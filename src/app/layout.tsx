@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
+import { Analytics } from "@vercel/analytics/next";
 
 import { AuthProvider } from "@/components/providers/AuthProvider";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
             </div>
           </div>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
