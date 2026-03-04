@@ -1,0 +1,78 @@
+﻿
+D:\Discord bot\SvrForgeV3\.agent\skills\ui-ux-pro-max-skill\cli\src\utils\template.ts
+   1:50  warning  'readdir' is defined but never used                @typescript-eslint/no-unused-vars
+  76:23  warning  'platformName' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Discord bot\SvrForgeV3\src\app\admin\page.tsx
+    2:38   warning  'TrendingUp' is defined but never used                           @typescript-eslint/no-unused-vars
+  122:94   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  122:104  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+D:\Discord bot\SvrForgeV3\src\app\api\auth\accounts\route.ts
+  33:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  68:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Discord bot\SvrForgeV3\src\app\api\auth\register\route.ts
+  50:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Discord bot\SvrForgeV3\src\app\api\servers\route.ts
+   4:35  warning  'arrayContains' is defined but never used        @typescript-eslint/no-unused-vars
+   4:50  warning  'or' is defined but never used                   @typescript-eslint/no-unused-vars
+  18:15  warning  'onlineOnly' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  19:15  warning  'minPlayers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Discord bot\SvrForgeV3\src\app\dashboard\page.tsx
+  31:97  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\Discord bot\SvrForgeV3\src\app\login\page.tsx
+   38:18  warning  'err' is defined but never used                                  @typescript-eslint/no-unused-vars
+  119:24  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\Discord bot\SvrForgeV3\src\app\profile\page.tsx
+   11:58  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   12:12  warning  'hasPassword' is assigned a value but never used                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   68:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  119:67  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+
+D:\Discord bot\SvrForgeV3\src\app\server\[slug]\page.tsx
+   3:8   warning  'Link' is defined but never used    @typescript-eslint/no-unused-vars
+   4:76  warning  'Disc' is defined but never used    @typescript-eslint/no-unused-vars
+  36:44  warning  'params' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Discord bot\SvrForgeV3\src\app\signup\page.tsx
+  52:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Discord bot\SvrForgeV3\src\app\top\TopClient.tsx
+  10:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  16:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  71:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Discord bot\SvrForgeV3\src\app\trending\TrendingClient.tsx
+   10:44   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   16:44   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   27:69   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   71:45   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  121:105  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\Discord bot\SvrForgeV3\src\components\layout\TopBar.tsx
+   9:10  warning  'cn' is defined but never used                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  61:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+D:\Discord bot\SvrForgeV3\src\components\server\FilterSidebar.tsx
+   4:31  warning  'Check' is defined but never used         @typescript-eslint/no-unused-vars
+   8:31  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:53  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Discord bot\SvrForgeV3\src\components\ui\ServerCard.tsx
+  4:31  warning  'Flame' is defined but never used       @typescript-eslint/no-unused-vars
+  4:52  warning  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+  4:84  warning  'Wifi' is defined but never used        @typescript-eslint/no-unused-vars
+
+D:\Discord bot\SvrForgeV3\src\lib\auth.ts
+   68:39  warning  'profile' is defined but never used       @typescript-eslint/no-unused-vars
+  183:61  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:65  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 43 problems (21 errors, 22 warnings)
+

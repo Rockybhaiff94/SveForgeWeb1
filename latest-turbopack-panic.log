@@ -1,0 +1,35 @@
+---------------------------
+failed to create junction point to ../../../node_modules/bcrypt
+
+Caused by:
+- The file exists. (os error 80)
+---------------------------
+failed to create junction point to ../../../node_modules/bcrypt
+
+Caused by:
+- The file exists. (os error 80)
+---------------------------
+failed to create junction point to ../../../node_modules/bcrypt
+
+Caused by:
+- The file exists. (os error 80)
+---------------------------
+Resource path "src/app/trending/TrendingClient.tsx" need to be on project filesystem ""
+
+Debug info:
+- Execution of hmr_update_with_issues_operation failed
+- Execution of PlainIssue::from_issue failed
+- Execution of PlainSource::from_source failed
+- Execution of <WebpackLoadersProcessedAsset as Asset>::content failed
+- Execution of WebpackLoadersProcessedAsset::process failed
+- Resource path "src/app/trending/TrendingClient.tsx" need to be on project filesystem ""
+---------------------------
+failed to create junction point to ../../../node_modules/bcrypt
+
+Caused by:
+- The file exists. (os error 80)
+---------------------------
+failed to create junction point to ../../../node_modules/bcrypt
+
+Caused by:
+- The file exists. (os error 80)

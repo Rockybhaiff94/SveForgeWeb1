@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background-start: #050505;
+  --color-background-end: #000000;
+  --color-panel: #121212;
+  --color-panel-hover: #1A1A1A;
+  --color-border-glow: rgba(59, 130, 246, 0.4);
+  --color-accent-blue: #3B82F6;
+  --color-accent-orange: #F97316;
+  --color-text-main: #FFFFFF;
+  --color-text-muted: #9CA3AF;
+  --color-online: #10B981;
+  --color-offline: #EF4444;
+
+  --animate-glow: glow 3s ease-in-out infinite alternate;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.1), 0 0 20px rgba(59, 130, 246, 0.05);
+    }
+
+    100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.15);
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+}
+
+:root {
+  --background: #050505;
+  --foreground: #FFFFFF;
+}
+
+body {
+  background: linear-gradient(to bottom right, var(--color-background-start), var(--color-background-end));
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Glassmorphism utility layer */
+@layer utilities {
+  .glass-panel {
+    background-color: var(--color-panel);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .glass-panel-hover:hover {
+    background-color: var(--color-panel-hover);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px var(--color-border-glow);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple) 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: white;
+}
