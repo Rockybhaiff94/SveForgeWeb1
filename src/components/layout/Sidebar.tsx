@@ -1,10 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { Compass, Flame, TrendingUp, PlusCircle, LayoutDashboard, Settings } from "lucide-react";
+import { Home, Compass, Flame, TrendingUp, PlusCircle, LayoutDashboard, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-    { name: "Discover", href: "/", icon: Compass },
+    { name: "Home", href: "/", icon: Home },
+    { name: "Discover", href: "/discover", icon: Compass },
     { name: "Trending", href: "/trending", icon: Flame },
     { name: "Top Rated", href: "/top", icon: TrendingUp },
     { name: "Add Server", href: "/add", icon: PlusCircle, highlight: true },
