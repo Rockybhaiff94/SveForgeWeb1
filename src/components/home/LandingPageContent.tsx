@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { LandingNavBar } from "@/components/home/LandingNavBar";
 import { ServerCard } from "@/components/ui/ServerCard";
 import { Button } from "@/components/ui/Button";
 import { Search, TrendingUp, BarChart, Shield, UserPlus, Gamepad2, Users, ArrowRight, Activity, Globe, ChevronRight, Server } from "lucide-react";
@@ -102,8 +103,10 @@ export default function LandingPageContent() {
                 <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
             </div>
 
+            <LandingNavBar />
+
             {/* 1. HERO SECTION */}
-            <section className="relative pt-24 pb-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-16">
+            <section className="relative pt-32 pb-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-16">
                 <motion.div
                     className="flex-1 text-center lg:text-left z-10"
                     initial={{ opacity: 0, y: 30 }}
