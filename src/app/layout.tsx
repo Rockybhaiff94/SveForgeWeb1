@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppLayoutWrapper } from "@/components/layout/AppLayoutWrapper";
+import { Analytics } from "@vercel/analytics/next";
 
 import { AuthProvider } from "@/components/providers/AuthProvider";
 
@@ -28,6 +29,7 @@ export default function RootLayout({
         <AuthProvider>
           <AppLayoutWrapper>{children}</AppLayoutWrapper>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
