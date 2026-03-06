@@ -87,7 +87,7 @@ export default function ServerDetailPage({ params }: { params: { slug: string } 
                             </div>
                             <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 backdrop-blur-md">
                                 <ChevronUp className="w-4 h-4" />
-                                {server.votes.toLocaleString()} Votes
+                                {server.votes.toLocaleString("en-US")} Votes
                             </div>
                             {server.status === "online" && (
                                 <div className="flex items-center gap-1.5 bg-white/5 text-gray-300 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">

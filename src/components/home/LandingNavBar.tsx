@@ -30,6 +30,7 @@ export function LandingNavBar() {
             </div>
 
             <nav className="hidden lg:flex items-center justify-center gap-8 flex-1">
+                <Link href="/home" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Home</Link>
                 <Link href="/discover" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Discover</Link>
                 <Link href="/trending" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Trending</Link>
                 <Link href="/top" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Top Rated</Link>

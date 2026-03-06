@@ -55,7 +55,7 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
     }
 
     return (
-        <Card className={`flex flex-col h-full group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative overflow-hidden backdrop-blur-xl saturate-150`}>
+        <Card className={`flex flex-col h-full group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative backdrop-blur-xl saturate-150`}>
             {/* Elite Badge / Rank */}
             {rank && (
                 <div className={`absolute -top-3 -left-3 z-30 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shadow-xl border-2 ${isTopRated && isGold ? "bg-yellow-500 text-black border-yellow-300" :
@@ -179,7 +179,7 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                         </div>
                         <div className="flex items-center gap-1.5" title="Votes">
                             <Crown className="w-3.5 h-3.5 text-purple-400" />
-                            <span>{server.votes.toLocaleString()}</span>
+                            <span>{server.votes.toLocaleString("en-US")}</span>
                         </div>
                     </div>
                 </div>

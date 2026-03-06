@@ -125,7 +125,7 @@ export default function LandingPageContent() {
                         Find and join Minecraft, FiveM, Rust, and CS2 servers in seconds. Join massive communities or create your own legacy.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                        <Link href="/discover" className="w-full sm:w-auto">
+                        <Link href="/home" className="w-full sm:w-auto">
                             <Button size="lg" className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all h-14 px-8 text-lg hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]">
                                 Explore Servers <ArrowRight className="ml-2 w-5 h-5" />
                             </Button>
@@ -318,7 +318,7 @@ export default function LandingPageContent() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-white text-sm">{cat.name}</h3>
-                                    <p className="text-xs text-[#9CA3AF] mt-1">{cat.count.toLocaleString()} Servers</p>
+                                    <p className="text-xs text-[#9CA3AF] mt-1">{cat.count.toLocaleString("en-US")} Servers</p>
                                 </div>
                             </motion.div>
                         </Link>

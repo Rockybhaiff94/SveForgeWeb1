@@ -31,6 +31,7 @@ export function TopBar() {
             </div>
 
             <nav className="hidden lg:flex items-center gap-6 ml-6 mr-6 flex-1">
+                <Link href="/home" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Home</Link>
                 <Link href="/discover" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Discover</Link>
                 <Link href="/trending" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Trending</Link>
                 <Link href="/top" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Top Rated</Link>
@@ -109,7 +110,7 @@ export function TopBar() {
                                     Login
                                 </Button>
                             </Link>
-                            <Link href={`/signup?callbackUrl=${callbackUrl}`}>
+                            <Link href={`/login?callbackUrl=${callbackUrl}`}>
                                 <Button variant="glow" className="shadow-[0_0_15px_rgba(37,99,235,0.4)]">
                                     Sign Up
                                 </Button>
