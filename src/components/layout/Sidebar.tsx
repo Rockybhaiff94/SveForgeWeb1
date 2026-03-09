@@ -7,7 +7,7 @@ import { Home, Compass, Flame, TrendingUp, PlusCircle, LayoutDashboard, Settings
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-    { name: "Home", href: "/", icon: Home },
+    { name: "Home", href: "/home", icon: Home },
     { name: "Discover", href: "/discover", icon: Compass },
     { name: "Trending", href: "/trending", icon: Flame },
     { name: "Top Rated", href: "/top", icon: TrendingUp },
@@ -23,14 +23,14 @@ export function Sidebar({ className }: { className?: string }) {
     const pathname = usePathname();
 
     const isActive = (href: string) => {
-        if (href === '/') return pathname === '/' || pathname === '/home';
+        if (href === '/home') return pathname === '/home';
         return pathname.startsWith(href);
     };
 
     return (
         <aside className={cn("w-64 border-r border-white/10 bg-[#050505] h-screen sticky top-0 flex flex-col hidden lg:flex", className)}>
             <div className="p-6">
-                <Link href="/" className="flex items-center gap-3">
+                <Link href="/home" className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-[#3B82F6] flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.3)]">
                         <span className="font-bold text-white text-lg">S</span>
                     </div>

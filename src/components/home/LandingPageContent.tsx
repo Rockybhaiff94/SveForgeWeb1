@@ -130,7 +130,7 @@ export default function LandingPageContent() {
                                 Explore Servers <ArrowRight className="ml-2 w-5 h-5" />
                             </Button>
                         </Link>
-                        <Link href="/dashboard/add-server" className="w-full sm:w-auto">
+                        <Link href="/login" className="w-full sm:w-auto">
                             <Button size="lg" variant="outline" className="w-full border-white/10 hover:bg-white/5 text-white bg-[#121218] transition-all h-14 px-8 text-lg font-medium">
                                 Add Your Server
                             </Button>
@@ -335,7 +335,7 @@ export default function LandingPageContent() {
                         <p className="text-[#9CA3AF] text-lg max-w-2xl mx-auto mb-10">
                             Join thousands of server owners who use ServerForge to reach new players, manage analytics, and build thriving communities. List your server for free today.
                         </p>
-                        <Link href="/dashboard/add-server">
+                        <Link href="/login">
                             <Button size="lg" className="bg-[#FF7A1A] hover:bg-[#EA580C] text-white font-bold h-14 px-10 text-lg shadow-[0_0_20px_rgba(255,122,26,0.3)] hover:shadow-[0_0_30px_rgba(255,122,26,0.5)] transition-all">
                                 Add Your Server <ArrowRight className="ml-2 w-5 h-5" />
                             </Button>
@@ -384,7 +384,7 @@ export default function LandingPageContent() {
                                 <li><Link href="/discover" className="text-[#9CA3AF] hover:text-white transition-colors">Discover Servers</Link></li>
                                 <li><Link href="/trending" className="text-[#9CA3AF] hover:text-[#FF7A1A] transition-colors">Trending Servers</Link></li>
                                 <li><Link href="/top" className="text-[#9CA3AF] hover:text-white transition-colors">Top Rated</Link></li>
-                                <li><Link href="/dashboard/add-server" className="text-[#9CA3AF] hover:text-[#3B82F6] transition-colors">Add Server</Link></li>
+                                <li><Link href="/login" className="text-[#9CA3AF] hover:text-[#3B82F6] transition-colors">Add Server</Link></li>
                                 <li><Link href="/dashboard" className="text-[#9CA3AF] hover:text-white transition-colors">Owner Dashboard</Link></li>
                             </ul>
                         </div>
