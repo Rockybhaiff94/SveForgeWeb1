@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Search, Bell, Menu, User, Settings as SettingsIcon, LogOut, Disc } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSession, signOut } from "next-auth/react";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 export function TopBar() {
     const { data: session, status } = useSession();
     const pathname = usePathname();
+    const router = useRouter();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     // Create a safe callback URL that avoids redirect loops
@@ -22,16 +23,16 @@ export function TopBar() {
                 <Button variant="ghost" size="icon" className="text-gray-400">
                     <Menu className="w-5 h-5" />
                 </Button>
-                <Link href="/" className="flex items-center gap-2">
+                <button onClick={() => router.back()} className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-80">
                     <div className="w-6 h-6 rounded-md bg-[#3B82F6] flex items-center justify-center">
                         <span className="font-bold text-white text-xs">S</span>
                     </div>
                     <span className="font-bold tracking-tight text-white">ServerForge</span>
-                </Link>
+                </button>
             </div>
 
             <nav className="hidden lg:flex items-center gap-6 ml-6 mr-6 flex-1">
-                <Link href="/home" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Home</Link>
+                <Link href="/home" onClick={(e) => { if (pathname === '/home') e.preventDefault(); }} className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Home</Link>
                 <Link href="/discover" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Discover</Link>
                 <Link href="/trending" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Trending</Link>
                 <Link href="/top" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Top Rated</Link>
