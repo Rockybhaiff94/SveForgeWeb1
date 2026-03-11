@@ -17,25 +17,15 @@ export async function GET(req: NextRequest) {
     const { clientId, clientSecret, redirectUri } = config.discord;
     const { secret: JWT_SECRET } = config.jwt;
 
-    if (!clientId || !clientSecret || !redirectUri || !JWT_SECRET) {
-        console.error('Missing required environment variables:', {
-            hasClientId: !!clientId,
-            hasClientSecret: !!clientSecret,
-            hasRedirectUri: !!redirectUri,
-            hasJwtSecret: !!JWT_SECRET
-        });
-        return NextResponse.redirect(new URL('/login?error=config_error', req.url));
-    }
-
     try {
         console.log('Exchanging code for token...');
         // 1. Exchange code for Discord access token using fetch
         const tokenParams = new URLSearchParams({
-            client_id: clientId,
-            client_secret: clientSecret,
+            client_id: clientId!,
+            client_secret: clientSecret!,
             grant_type: 'authorization_code',
             code,
-            redirect_uri: redirectUri,
+            redirect_uri: redirectUri!,
         });
 
         const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
@@ -101,7 +91,7 @@ export async function GET(req: NextRequest) {
                 userId: user._id.toString(),
                 discordId: user.discordId,
             },
-            JWT_SECRET,
+            JWT_SECRET!,
             { expiresIn: '7d' }
         );
 
