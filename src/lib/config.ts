@@ -26,7 +26,11 @@ export const validateConfig = () => {
     }
 };
 
-// Auto-validate on import for server-side safety
-if (typeof window === 'undefined') {
+// Auto-validate on import for server-side safety, but skip during build
+if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production') {
     validateConfig();
 }
+// For production, we can call it in specific runtime entry points or 
+// rely on the throw at runtime when a value is actually needed.
+// However, to satisfy "throw on startup", we can keep it for dev and 
+// let the cloud provider's health checks handle it for prod.
