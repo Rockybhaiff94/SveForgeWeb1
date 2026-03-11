@@ -1,26 +1,17 @@
-"use client";
-
-import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function OAuthButtons() {
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/profile";
     const [isLoading, setIsLoading] = useState<"google" | "discord" | null>(null);
-
-    const handleOAuth = async (provider: "google" | "discord") => {
-        setIsLoading(provider);
-        await signIn(provider, { callbackUrl });
-    };
 
     return (
         <div className="flex flex-col gap-3 w-full">
             <button
                 type="button"
-                onClick={() => handleOAuth("google")}
-                disabled={isLoading !== null}
-                className="relative flex items-center justify-center w-full px-4 py-2.5 space-x-3 text-sm font-medium text-white bg-[#121212] border border-white/10 rounded-xl hover:bg-white/5 hover:border-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+                disabled={true}
+                title="Google login is currently disabled"
+                className="relative flex items-center justify-center w-full px-4 py-2.5 space-x-3 text-sm font-medium text-white/40 bg-[#121212] border border-white/5 rounded-xl cursor-not-allowed group overflow-hidden"
             >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#2563EB]/10 to-[#3B82F6]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 {isLoading === "google" ? (
@@ -36,21 +27,15 @@ export function OAuthButtons() {
                 <span className="relative z-10">Continue with Google</span>
             </button>
 
-            <button
-                type="button"
-                onClick={() => handleOAuth("discord")}
-                disabled={isLoading !== null}
-                className="relative flex items-center justify-center w-full px-4 py-2.5 space-x-3 text-sm font-medium text-white bg-[#5865F2]/20 border border-[#5865F2]/30 rounded-xl hover:bg-[#5865F2]/40 hover:border-[#5865F2]/50 hover:shadow-[0_0_15px_rgba(88,101,242,0.4)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+            <a
+                href="/api/auth/discord"
+                className="relative flex items-center justify-center w-full px-4 py-2.5 space-x-3 text-sm font-medium text-white bg-[#5865F2]/20 border border-[#5865F2]/30 rounded-xl hover:bg-[#5865F2]/40 hover:border-[#5865F2]/50 hover:shadow-[0_0_15px_rgba(88,101,242,0.4)] transition-all duration-300 group overflow-hidden"
             >
-                {isLoading === "discord" ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                ) : (
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02C2.05 11.11.5 16.36 1.39 21.58c0 .02.01.03.03.04c1.77 1.3 3.47 2.08 5.12 2.6a.09.09 0 0 0 .1-.03c.4-.54.77-1.11 1.1-1.71c.02-.04 0-.09-.04-.11a11.17 11.17 0 0 1-1.63-.77c-.04-.02-.05-.06-.02-.09c.11-.08.23-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.08.22.17.34.25c.03.03.02.07-.02.09a11.36 11.36 0 0 1-1.64.77c-.04.01-.05.06-.04.11c.32.6.7 1.17 1.1 1.71c.02.03.06.04.1.03c1.65-.52 3.35-1.3 5.12-2.6c.02-.01.03-.02.03-.04c1.03-5.92-.93-11.07-3.32-16.23c-.02-.01-.03-.02-.03-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z" />
-                    </svg>
-                )}
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02C2.05 11.11.5 16.36 1.39 21.58c0 .02.01.03.03.04c1.77 1.3 3.47 2.08 5.12 2.6a.09.09 0 0 0 .1-.03c.4-.54.77-1.11 1.1-1.71c.02-.04 0-.09-.04-.11a11.17 11.17 0 0 1-1.63-.77c-.04-.02-.05-.06-.02-.09c.11-.08.23-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.08.22.17.34.25c.03.03.02.07-.02.09a11.36 11.36 0 0 1-1.64.77c-.04.01-.05.06-.04.11c.32.6.7 1.17 1.1 1.71c.02.03.06.04.1.03c1.65-.52 3.35-1.3 5.12-2.6c.02-.01.03-.02.03-.04c1.03-5.92-.93-11.07-3.32-16.23c-.02-.01-.03-.02-.03-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z" />
+                </svg>
                 <span className="relative z-10">Continue with Discord</span>
-            </button>
+            </a>
         </div>
     );
 }

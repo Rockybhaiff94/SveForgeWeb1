@@ -3,23 +3,30 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, Flame, TrendingUp, PlusCircle, LayoutDashboard, Settings } from "lucide-react";
+import {
+    Home,
+    Compass,
+    Flame,
+    TrendingUp,
+    PlusCircle,
+    LayoutDashboard,
+    Settings,
+    Server,
+    Bell,
+    LogOut,
+    BarChart3
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
     { name: "Home", href: "/home", icon: Home },
     { name: "Discover", href: "/discover", icon: Compass },
-    { name: "Trending", href: "/trending", icon: Flame },
-    { name: "Top Rated", href: "/top", icon: TrendingUp },
+    { name: "Trending", href: "#", icon: Flame },
+    { name: "Top Rated", href: "#", icon: TrendingUp },
     { name: "Add Server", href: "/add", icon: PlusCircle, highlight: true },
 ];
 
-const SECONDARY_ITEMS = [
-    { name: "My Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Admin", href: "/admin", icon: Settings },
-];
-
-export function Sidebar({ className }: { className?: string }) {
+export function Sidebar({ className, user }: { className?: string, user: any }) {
     const pathname = usePathname();
 
     const isActive = (href: string) => {
@@ -60,33 +67,6 @@ export function Sidebar({ className }: { className?: string }) {
                                         "w-5 h-5 transition-colors",
                                         active ? "text-[#6366f1]" : "text-white/60 group-hover:text-white/80",
                                         !active && item.highlight && "text-[#3B82F6]"
-                                    )} />
-                                    {item.name}
-                                </Link>
-                            );
-                        })}
-                    </nav>
-                </div>
-
-                <div>
-                    <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</p>
-                    <nav className="space-y-1">
-                        {SECONDARY_ITEMS.map((item) => {
-                            const active = isActive(item.href);
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={cn(
-                                        "flex items-center gap-3 px-3 py-2 text-sm transition-all group border",
-                                        active
-                                            ? "bg-gradient-to-r from-[#3B82F6]/15 to-[#6366f1]/15 border-[#6366f1]/40 rounded-xl shadow-[0_0_12px_rgba(99,102,241,0.25)] text-white font-medium"
-                                            : "border-transparent text-white/65 hover:bg-white/5 hover:text-white rounded-xl"
-                                    )}
-                                >
-                                    <item.icon className={cn(
-                                        "w-5 h-5 transition-colors",
-                                        active ? "text-[#6366f1]" : "text-white/60 group-hover:text-white/80"
                                     )} />
                                     {item.name}
                                 </Link>

@@ -1,93 +1,47 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
-function LoginForm() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/profile";
-
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const res = await signIn("credentials", {
-                email,
-                password,
-                redirect: false,
-            });
-
-            if (res?.error) {
-                setError("Invalid email or password");
-                setIsLoading(false);
-            } else {
-                router.push(callbackUrl);
-                router.refresh();
-            }
-        } catch (err) {
-            setError("An unexpected error occurred");
-            setIsLoading(false);
-        }
+function LoginMessage({ error }: { error: string | null }) {
+    const errorMessages: Record<string, string> = {
+        'auth_failed': 'Authentication failed. Please check your Discord settings and try again.',
+        'no_code': 'No authorization code received from Discord.',
+        'config_error': 'Server configuration error. Please contact the administrator.',
+        'default': 'An error occurred during login. Please try again.'
     };
 
-    return (
-        <form className="space-y-4" onSubmit={handleSubmit}>
-            {error && (
-                <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg text-center">
-                    {error}
-                </div>
-            )}
-            <div>
-                <label className="block text-sm font-medium text-[#9CA3AF] mb-1" htmlFor="email">Email address</label>
-                <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full bg-[#121212] border-white/10 rounded-lg py-2.5 px-4 text-sm text-[#9CA3AF] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 focus:border-[#3B82F6]/50 transition-all"
-                    placeholder="you@example.com"
-                />
+    if (error) {
+        return (
+            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl space-y-2 mb-6">
+                <p className="text-sm text-red-400 text-center font-bold">
+                    {errorMessages[error] || errorMessages.default}
+                </p>
+                <p className="text-[10px] text-gray-500 text-center uppercase tracking-widest">
+                    Reference: {error}
+                </p>
             </div>
-            <div>
-                <div className="flex items-center justify-between mb-1">
-                    <label className="block text-sm font-medium text-[#9CA3AF]" htmlFor="password">Password</label>
-                    <Link href="#" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Forgot password?</Link>
-                </div>
-                <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full bg-[#121212] border-white/10 rounded-lg py-2.5 px-4 text-sm text-[#9CA3AF] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 focus:border-[#3B82F6]/50 transition-all"
-                    placeholder="••••••••"
-                />
-            </div>
+        );
+    }
 
-            <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full mt-6 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:from-[#3B82F6] hover:to-[#60A5FA] text-white font-semibold rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all transform hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-            >
-                {isLoading ? "Signing in..." : "Sign In"}
-            </button>
-        </form>
+    return (
+        <div className="bg-blue-500/5 border border-blue-500/10 p-4 rounded-xl space-y-2">
+            <p className="text-sm text-gray-300 text-center">
+                Email/Password login is currently unavailable.
+            </p>
+            <p className="text-xs text-blue-400 text-center font-bold uppercase tracking-widest">
+                Please use Discord to continue
+            </p>
+        </div>
     );
 }
 
 export default function LoginPage() {
+    const searchParams = useSearchParams();
+    const error = searchParams.get("error");
+
     return (
         <div className="flex min-h-[80vh] items-center justify-center p-4">
             <div className="w-full max-w-md glass-panel p-8 rounded-2xl border border-white/10 relative overflow-hidden">
@@ -101,39 +55,24 @@ export default function LoginPage() {
                     <p className="text-gray-400 text-sm mt-2">Log in to your ServerForge account</p>
                 </div>
 
-                <Suspense fallback={<div className="h-28 animate-pulse bg-white/5 rounded-xl rounded-b-none border border-white/10 mb-6"></div>}>
+                <Suspense fallback={<div className="h-14 animate-pulse bg-white/5 rounded-xl border border-white/10 mb-6"></div>}>
                     <OAuthButtons />
                 </Suspense>
 
-                <div className="flex items-center gap-4 my-6">
+                <div className="flex items-center gap-4 my-8">
                     <div className="h-px bg-white/10 flex-1"></div>
-                    <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">Or continue with</span>
+                    <span className="text-[10px] text-gray-600 font-black uppercase tracking-[0.2em]">Maintenance</span>
                     <div className="h-px bg-white/10 flex-1"></div>
                 </div>
 
-                <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3B82F6]"></div></div>}>
-                    <LoginForm />
-                </Suspense>
+                <LoginMessage error={error} />
 
-                <p className="text-center text-sm text-gray-400 mt-6">
-                    Don't have an account?{" "}
-                    <Suspense fallback={<span>Sign up</span>}>
-                        <SignUpLink />
-                    </Suspense>
-                </p>
+                <div className="mt-8 pt-6 border-t border-white/5 text-center">
+                    <p className="text-xs text-gray-500">
+                        By logging in, you agree to our <Link href="/terms" className="text-gray-400 hover:text-white underline">Terms</Link> and <Link href="/privacy" className="text-gray-400 hover:text-white underline">Privacy</Link>.
+                    </p>
+                </div>
             </div>
         </div>
-    );
-}
-
-function SignUpLink() {
-    const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl");
-    const href = callbackUrl ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/signup";
-
-    return (
-        <Link href={href} className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-            Sign up
-        </Link>
     );
 }
