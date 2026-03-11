@@ -4,6 +4,10 @@ import dns from 'dns';
 // Force DNS to resolve IPv4 first to avoid querySrv ECONNREFUSED issues in some environments
 dns.setDefaultResultOrder('ipv4first');
 
+declare global {
+    var mongoose: any; // Using any for simplicity in this case
+}
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
