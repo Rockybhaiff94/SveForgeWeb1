@@ -17,32 +17,28 @@ export async function GET(req: NextRequest) {
     const { clientId, clientSecret, redirectUri } = config.discord;
     const { secret: JWT_SECRET } = config.jwt;
 
-    console.log('Credential Check:', {
-        clientIdValid: !!clientId,
-        clientIdLength: clientId?.length,
-        clientSecretValid: !!clientSecret,
-        clientSecretLength: clientSecret?.length,
-        redirectUri: redirectUri
-    });
+    console.log('--- Credential Verification ---');
+    console.log('Client ID:', clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : 'MISSING');
+    console.log('Client Secret:', clientSecret ? `${clientSecret.slice(0, 4)}...${clientSecret.slice(-4)}` : 'MISSING');
+    console.log('Redirect URI:', redirectUri || 'MISSING');
+    console.log('-------------------------------');
 
     try {
         console.log('Exchanging code for token...');
         // 1. Exchange code for Discord access token using fetch
         const tokenParams = new URLSearchParams({
+            client_id: clientId!,
+            client_secret: clientSecret!,
             grant_type: 'authorization_code',
             code,
             redirect_uri: redirectUri!,
         });
-
-        // Use Basic Auth header for better compatibility
-        const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
         const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
             method: 'POST',
             body: tokenParams,
             headers: { 
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': `Basic ${authHeader}`
             },
         });
 
@@ -50,11 +46,11 @@ export async function GET(req: NextRequest) {
 
         if (!tokenRes.ok) {
             console.error('Discord Token Exchange Failed:', tokenData);
-            // Log body params too for debugging (masking secret)
-            console.log('Token Request Params:', {
-                grant_type: 'authorization_code',
-                redirect_uri: redirectUri,
-                has_code: !!code
+            // Additional debug info
+            console.log('Token Request Context:', {
+                status: tokenRes.status,
+                statusText: tokenRes.statusText,
+                url: 'https://discord.com/api/oauth2/token'
             });
             return NextResponse.redirect(new URL('/login?error=auth_failed', req.url));
         }
