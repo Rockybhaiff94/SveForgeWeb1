@@ -1,14 +1,14 @@
 export const config = {
     discord: {
-        clientId: process.env.DISCORD_CLIENT_ID?.trim(),
-        clientSecret: process.env.DISCORD_CLIENT_SECRET?.trim(),
-        redirectUri: process.env.DISCORD_REDIRECT_URI?.trim(),
+        clientId: (process.env.DISCORD_CLIENT_ID || '').trim(),
+        clientSecret: (process.env.DISCORD_CLIENT_SECRET || '').trim(),
+        redirectUri: (process.env.DISCORD_REDIRECT_URI || process.env.AUTH_DISCORD_REDIRECT_URL || '').trim(),
     },
     mongodb: {
-        uri: process.env.MONGODB_URI?.trim(),
+        uri: (process.env.MONGODB_URI || '').trim(),
     },
     jwt: {
-        secret: process.env.JWT_SECRET?.trim(),
+        secret: (process.env.JWT_SECRET || '').trim(),
     },
     baseUrl: (process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://serverforge.xyz').trim(),
 };
