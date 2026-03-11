@@ -129,6 +129,7 @@ export async function GET(req: NextRequest) {
         return response;
     } catch (error: any) {
         console.error('Unexpected Discord OAuth Error:', error);
-        return NextResponse.redirect(new URL('/login?error=auth_failed', req.url));
+        const errorMsg = encodeURIComponent(error.message || 'unknown_error');
+        return NextResponse.redirect(new URL(`/login?error=auth_failed&details=${errorMsg}`, req.url));
     }
 }
