@@ -8,9 +8,13 @@ export async function GET() {
     console.log('Client ID:', DISCORD_CLIENT_ID);
     console.log('Redirect URI:', DISCORD_REDIRECT_URI);
 
-    if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
-        console.error('Missing Discord configuration');
-        return NextResponse.json({ error: 'Missing Discord configuration' }, { status: 500 });
+    if (!DISCORD_CLIENT_ID) {
+        console.error('Missing DISCORD_CLIENT_ID');
+        return NextResponse.json({ error: 'Missing DISCORD_CLIENT_ID' }, { status: 500 });
+    }
+    if (!DISCORD_REDIRECT_URI) {
+        console.error('Missing DISCORD_REDIRECT_URI');
+        return NextResponse.json({ error: 'Missing DISCORD_REDIRECT_URI' }, { status: 500 });
     }
 
     const authUrl = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&scope=identify%20email`;
