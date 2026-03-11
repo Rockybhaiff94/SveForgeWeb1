@@ -52,7 +52,8 @@ export async function GET(req: NextRequest) {
                 statusText: tokenRes.statusText,
                 url: 'https://discord.com/api/oauth2/token'
             });
-            return NextResponse.redirect(new URL('/login?error=auth_failed', req.url));
+            const errorDetail = tokenData.error || 'unknown_discord_error';
+            return NextResponse.redirect(new URL(`/login?error=auth_failed&details=${errorDetail}`, req.url));
         }
 
         const { access_token } = tokenData;
