@@ -28,7 +28,7 @@ async function dbConnect() {
     if (!cached.promise) {
         const MONGODB_URI = process.env.MONGODB_URI;
         if (!MONGODB_URI) {
-            throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+            throw new Error('MONGODB_URI is not defined in environment variables');
         }
 
         const opts = {
