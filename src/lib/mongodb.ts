@@ -8,11 +8,6 @@ declare global {
     var mongoose: any; // Using any for simplicity in this case
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -31,13 +26,18 @@ async function dbConnect() {
     }
 
     if (!cached.promise) {
+        const MONGODB_URI = process.env.MONGODB_URI;
+        if (!MONGODB_URI) {
+            throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+        }
+
         const opts = {
             bufferCommands: false,
             family: 4, // Force IPv4
         };
 
-        console.log('Connecting to MongoDB with URI starting with:', MONGODB_URI?.substring(0, 20) + '...');
-        cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+        console.log('Connecting to MongoDB with URI starting with:', MONGODB_URI.substring(0, 20) + '...');
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
             console.log('MongoDB Connected Successfully');
             return mongoose;
         }).catch(err => {
