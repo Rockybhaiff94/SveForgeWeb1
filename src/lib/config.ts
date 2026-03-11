@@ -2,7 +2,7 @@ export const config = {
     discord: {
         clientId: process.env.DISCORD_CLIENT_ID,
         clientSecret: process.env.DISCORD_CLIENT_SECRET,
-        redirectUri: process.env.DISCORD_REDIRECT_URI,
+        redirectUri: process.env.AUTH_DISCORD_REDIRECT_URL || process.env.DISCORD_REDIRECT_URI,
     },
     mongodb: {
         uri: process.env.MONGODB_URI,
@@ -16,7 +16,7 @@ export const config = {
 export const validateConfig = () => {
     const missing = [];
     if (!config.discord.clientId) missing.push('DISCORD_CLIENT_ID');
-    if (!config.discord.redirectUri) missing.push('DISCORD_REDIRECT_URI');
+    if (!config.discord.redirectUri) missing.push('AUTH_DISCORD_REDIRECT_URL');
     if (!config.mongodb.uri) missing.push('MONGODB_URI');
     if (!config.jwt.secret) missing.push('JWT_SECRET');
 

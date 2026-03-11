@@ -5,18 +5,20 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
     console.log('--- Auth Discord Config ---');
+    console.log('Config keys:', Object.keys(config.discord));
     console.log('Client ID length:', config.discord.clientId?.length || 0);
-    console.log('Redirect URI:', config.discord.redirectUri);
+    console.log('Redirect URI length:', config.discord.redirectUri?.length || 0);
+    console.log('Redirect URI value:', config.discord.redirectUri);
 
     if (!config.discord.clientId || !config.discord.redirectUri) {
         const missing = [];
         if (!config.discord.clientId) missing.push('DISCORD_CLIENT_ID');
-        if (!config.discord.redirectUri) missing.push('DISCORD_REDIRECT_URI');
+        if (!config.discord.redirectUri) missing.push('AUTH_DISCORD_REDIRECT_URL');
         
         console.error('Missing Discord configuration:', missing.join(', '));
         return NextResponse.json({ 
             error: `Missing configuration: ${missing.join(', ')}`,
-            envKeys: Object.keys(process.env).filter(k => k.startsWith('DISCORD'))
+            envKeys: Object.keys(process.env).filter(k => k.includes('DISCORD'))
         }, { status: 500 });
     }
 
