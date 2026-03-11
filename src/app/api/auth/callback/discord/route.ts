@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { config } from '@/lib/config';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
@@ -13,16 +14,14 @@ export async function GET(req: NextRequest) {
         return NextResponse.redirect(new URL('/login?error=no_code', req.url));
     }
 
-    const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-    const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-    const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
-    const JWT_SECRET = process.env.JWT_SECRET;
+    const { clientId, clientSecret, redirectUri } = config.discord;
+    const { secret: JWT_SECRET } = config.jwt;
 
-    if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI || !JWT_SECRET) {
+    if (!clientId || !clientSecret || !redirectUri || !JWT_SECRET) {
         console.error('Missing required environment variables:', {
-            hasClientId: !!DISCORD_CLIENT_ID,
-            hasClientSecret: !!DISCORD_CLIENT_SECRET,
-            hasRedirectUri: !!DISCORD_REDIRECT_URI,
+            hasClientId: !!clientId,
+            hasClientSecret: !!clientSecret,
+            hasRedirectUri: !!redirectUri,
             hasJwtSecret: !!JWT_SECRET
         });
         return NextResponse.redirect(new URL('/login?error=config_error', req.url));
@@ -32,11 +31,11 @@ export async function GET(req: NextRequest) {
         console.log('Exchanging code for token...');
         // 1. Exchange code for Discord access token using fetch
         const tokenParams = new URLSearchParams({
-            client_id: DISCORD_CLIENT_ID,
-            client_secret: DISCORD_CLIENT_SECRET,
+            client_id: clientId,
+            client_secret: clientSecret,
             grant_type: 'authorization_code',
             code,
-            redirect_uri: DISCORD_REDIRECT_URI,
+            redirect_uri: redirectUri,
         });
 
         const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
