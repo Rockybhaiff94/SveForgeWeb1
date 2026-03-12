@@ -8,81 +8,6 @@ import { ServerCard } from "@/components/ui/ServerCard";
 import { Button } from "@/components/ui/Button";
 import { Search, TrendingUp, BarChart, Shield, UserPlus, Gamepad2, Users, ArrowRight, Activity, Globe, ChevronRight, Server } from "lucide-react";
 
-// Minimal mock exactly recreating the "ServerCard" acceptable prop structure for preview 
-const FEATURED_SERVERS = [
-    {
-        name: "Hypixel Network",
-        slug: "hypixel-network",
-        description: "The largest Minecraft server in the world. Enjoy minigames, skyblock, and more!",
-        bannerImage: "https://images.unsplash.com/photo-1623947413645-0cd61e3d641d?q=80&w=1000&auto=format&fit=crop",
-        logoImage: null,
-        tags: ["Minigames", "Skyblock", "PvP"],
-        votes: 145920,
-        ratingAverage: 4.9,
-        status: "online" as const,
-        players: 48210,
-    },
-    {
-        name: "Rustafied EU Main",
-        slug: "rustafied-eu",
-        description: "Official Rust server. Weekly wipes, premium performance, survive and conquer.",
-        bannerImage: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop",
-        logoImage: null,
-        tags: ["Vanilla", "PvP", "Weekly"],
-        votes: 8934,
-        ratingAverage: 4.8,
-        status: "online" as const,
-        players: 320,
-    },
-    {
-        name: "Eclipse RP (FiveM)",
-        slug: "eclipse-rp",
-        description: "Premier GTA V Roleplay experience. Custom economy, jobs, police, and gangs.",
-        bannerImage: "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=1000&auto=format&fit=crop",
-        logoImage: null,
-        tags: ["Roleplay", "Economy", "Whitelist"],
-        votes: 12053,
-        ratingAverage: 4.7,
-        status: "online" as const,
-        players: 1024,
-    },
-    {
-        name: "ARK: Survival Ascended - Official PvE",
-        slug: "ark-ascended",
-        description: "Official PvE cluster serving multiple maps with cross-play enabled.",
-        bannerImage: null,
-        logoImage: null,
-        tags: ["PvE", "Crossplay", "Official"],
-        votes: 5621,
-        ratingAverage: 4.5,
-        status: "online" as const,
-        players: 250,
-    },
-    {
-        name: "CS2 Retakes & Scrims",
-        slug: "cs2-retakes",
-        description: "128-tick perfect CS2 retake servers with advanced stats and rank progression.",
-        bannerImage: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop",
-        logoImage: null,
-        tags: ["Retakes", "Competitive", "128-tick"],
-        votes: 4322,
-        ratingAverage: 4.8,
-        status: "online" as const,
-        players: 45,
-    },
-    {
-        name: "PixelMon Reforged",
-        slug: "pixelmon-reforged",
-        description: "Catch 'em all in Minecraft! Tournaments, gyms, and an active community.",
-        bannerImage: "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=1000&auto=format&fit=crop",
-        logoImage: null,
-        tags: ["Pixelmon", "Gyms", "Economy"],
-        votes: 890,
-        ratingAverage: 4.6,
-        status: "online" as const,
-        players: 450,
-    }
-];
 
 const GAME_CATEGORIES = [
     { name: "Minecraft", count: 8432, icon: <Globe className="w-8 h-8 text-[#3B82F6]" /> },
@@ -102,6 +27,9 @@ export default function LandingPageContent() {
     });
     const [isLoadingStats, setIsLoadingStats] = useState(true);
 
+    const [featuredServers, setFeaturedServers] = useState<any[]>([]);
+    const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -117,7 +45,24 @@ export default function LandingPageContent() {
             }
         };
 
+        const fetchFeatured = async () => {
+             try {
+                 const res = await fetch('/api/servers?sortBy=rating&limit=3', {
+                     next: { revalidate: 60 }
+                 });
+                 if (res.ok) {
+                      const json = await res.json();
+                      setFeaturedServers(json.servers || []);
+                 }
+             } catch (error) {
+                 console.error("Failed to load featured servers:", error);
+             } finally {
+                 setIsLoadingFeatured(false);
+             }
+        }
+
         fetchStats();
+        fetchFeatured();
     }, []);
 
     return (
@@ -260,7 +205,16 @@ export default function LandingPageContent() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {FEATURED_SERVERS.map((server, idx) => (
+                        {isLoadingFeatured ? (
+                             <div className="col-span-full flex flex-col items-center justify-center py-16">
+                                  <div className="w-8 h-8 rounded-full border-4 border-[#3B82F6]/30 border-t-[#3B82F6] animate-spin mb-4" />
+                                  <p className="text-gray-400">Loading top rated communities...</p>
+                             </div>
+                        ) : featuredServers.length === 0 ? (
+                             <div className="col-span-full text-center py-16 bg-white/[0.02] border border-white/5 rounded-2xl w-full">
+                                  <p className="text-gray-400">No servers available to feature yet.</p>
+                             </div>
+                        ) : featuredServers.map((server, idx) => (
                             <motion.div
                                 key={server.slug}
                                 initial={{ opacity: 0, y: 20 }}

@@ -50,34 +50,51 @@ export async function GET(req: NextRequest) {
              }
         }
 
-        // Build Sort By
-        let sort: any = {};
+        // Build sort definition
+        let sortStage: any = {};
         switch (sortBy) {
             case "rating":
-                sort = { ratingAverage: -1, totalRatings: -1, votes: -1 };
+                sortStage = { ratingAverage: -1, totalRatings: -1, votes: -1 };
                 break;
             case "votes":
-                sort = { votes: -1, ratingAverage: -1 };
+                sortStage = { votes: -1, ratingAverage: -1 };
                 break;
             case "players":
-                sort = { votes: -1 }; // Fallback
+                sortStage = { players: -1, votes: -1 }; // Fix: Actually sort by players
                 break;
             case "newest":
-                sort = { createdAt: -1 };
+                sortStage = { createdAt: -1 };
                 break;
             case "bumped":
-                sort = { lastBumpAt: -1 };
+                sortStage = { lastBumpAt: -1 };
                 break;
             case "trending":
             default:
-                sort = { trendingScore: -1, votesLast7Days: -1, votes: -1 };
+                // Sort by the projected trending score field
+                sortStage = { computedTrendingScore: -1, votes: -1 };
                 break;
         }
 
-        const data = await Server.find(query)
-            .sort(sort)
-            .skip(skip)
-            .limit(limit);
+        // Use aggregation pipeline to dynamically compute metrics
+        const pipeline: any[] = [
+            { $match: query },
+            { 
+               $addFields: {
+                   // trending_score = (votesLast7Days * 2) + players + (maybe uptime later)
+                   computedTrendingScore: {
+                       $add: [
+                           { $multiply: ["$votesLast7Days", 2] },
+                           { $ifNull: ["$players", 0] }
+                       ]
+                   }
+               }
+            },
+            { $sort: sortStage },
+            { $skip: skip },
+            { $limit: limit }
+        ];
+
+        const data = await Server.aggregate(pipeline);
 
         return NextResponse.json({
             servers: data,
