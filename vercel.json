@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/status-check",
-      "schedule": "*/5 * * * *"
+      "path": "/api/cron/check-servers",
+      "schedule": "0 0 * * *"
     }
   ]
 }
