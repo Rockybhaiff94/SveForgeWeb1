@@ -56,19 +56,6 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
 
     return (
         <Card className={`flex flex-col h-full group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative backdrop-blur-xl saturate-150`}>
-            {/* Elite Badge / Rank */}
-            {rank && (
-                <div className={`absolute -top-3 -left-3 z-30 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shadow-xl border-2 ${isTopRated && isGold ? "bg-yellow-500 text-black border-yellow-300" :
-                    isTopRated && isSilver ? "bg-slate-300 text-black border-white" :
-                        isTopRated && isBronze ? "bg-amber-700 text-white border-amber-500" :
-                            isTrending && isGold ? "bg-orange-500 text-white border-orange-300" :
-                                "bg-[#141827] text-white border-white/20"
-                    }`}>
-                    {isGold && isTrending ? <Crown className="w-5 h-5" /> :
-                        isTopRated && isElite ? <Medal className="w-5 h-5" /> :
-                            `#${rank}`}
-                </div>
-            )}
 
             {/* Top Banner Section (16:9) */}
             <div className="relative aspect-video w-full rounded-t-3xl z-10">
