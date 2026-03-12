@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dns from 'dns';
+import { startMonitoring } from './monitor';
 
 // Force DNS to resolve IPv4 first to avoid querySrv ECONNREFUSED issues in some environments
 dns.setDefaultResultOrder('ipv4first');
@@ -39,6 +40,10 @@ async function dbConnect() {
         console.log('Connecting to MongoDB with URI starting with:', MONGODB_URI.substring(0, 20) + '...');
         cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
             console.log('MongoDB Connected Successfully');
+            
+            // Boot the background monitoring worker
+            startMonitoring();
+            
             return mongoose;
         }).catch(err => {
             console.error('MongoDB Connection Error Details:', err);
