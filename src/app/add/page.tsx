@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Server, Image as ImageIcon, Link as LinkIcon, CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Server, Image as ImageIcon, Link as LinkIcon, CheckCircle2, ChevronRight, ChevronLeft, UploadCloud, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function AddServerPage() {
@@ -18,12 +18,63 @@ export default function AddServerPage() {
         discordURL: "",
         websiteURL: "",
     });
+    
+    const [isUploading, setIsUploading] = useState({ banner: false, logo: false });
+    const bannerInputRef = useRef<HTMLInputElement>(null);
+    const logoInputRef = useRef<HTMLInputElement>(null);
 
     const nextStep = () => setStep((s) => Math.min(s + 1, 3));
     const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'logo') => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file');
+            return;
+        }
+
+        setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: true }));
+
+        try {
+            // 1. Get the Presigned URL from our Next.js API
+            const res = await fetch('/api/upload/url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileName: file.name, fileType: file.type })
+            });
+
+            const data = await res.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to get upload URL');
+            }
+
+            // 2. Upload the raw file directly to Amazon S3
+            const uploadRes = await fetch(data.uploadUrl, {
+                method: 'PUT',
+                body: file,
+                headers: {
+                    'Content-Type': file.type,
+                },
+            });
+
+            if (!uploadRes.ok) {
+                throw new Error('Failed to upload image to S3');
+            }
+
+            // 3. Save the final public URL
+            setFormData(prev => ({ ...prev, [type === 'banner' ? 'bannerImage' : 'logoImage']: data.publicUrl }));
+        } catch (error: any) {
+            console.error('Upload error:', error);
+            alert(error.message || 'An error occurred during upload.');
+        } finally {
+            setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: false }));
+        }
     };
 
     const STEPS = [
@@ -143,21 +194,83 @@ export default function AddServerPage() {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Banner Upload */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#9CA3AF]">Banner Image URL</label>
-                                    <input
-                                        type="url" name="bannerImage" value={formData.bannerImage} onChange={handleChange}
-                                        placeholder="https://imgur.com/... (16:9)"
-                                        className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
+                                    <label className="text-sm font-semibold text-[#9CA3AF]">Banner Image (16:9)</label>
+                                    
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        ref={bannerInputRef} 
+                                        onChange={(e) => handleImageUpload(e, 'banner')} 
                                     />
+                                    
+                                    {formData.bannerImage ? (
+                                        <div className="relative w-full h-32 md:h-40 rounded-xl overflow-hidden border border-white/10 group">
+                                            <img src={formData.bannerImage} alt="Banner Preview" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <Button type="button" variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/20" onClick={() => setFormData(prev => ({ ...prev, bannerImage: '' }))}>
+                                                    <X className="w-5 h-5 mr-2" /> Remove
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            onClick={() => bannerInputRef.current?.click()}
+                                            className="w-full h-32 md:h-40 border-2 border-dashed border-white/20 hover:border-[#3B82F6]/50 rounded-xl bg-[#121212]/50 hover:bg-[#3B82F6]/5 transition-all cursor-pointer flex flex-col items-center justify-center space-y-3"
+                                        >
+                                            {isUploading.banner ? (
+                                                <Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <UploadCloud className="w-8 h-8 text-gray-400" />
+                                                    <div className="text-center">
+                                                        <p className="text-sm text-gray-300 font-medium">Click to upload banner</p>
+                                                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 5MB</p>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
+
+                                {/* Logo Upload */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#9CA3AF]">Logo Image URL</label>
-                                    <input
-                                        type="url" name="logoImage" value={formData.logoImage} onChange={handleChange}
-                                        placeholder="https://imgur.com/... (1:1)"
-                                        className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
+                                    <label className="text-sm font-semibold text-[#9CA3AF]">Logo Image (1:1)</label>
+                                    
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        ref={logoInputRef} 
+                                        onChange={(e) => handleImageUpload(e, 'logo')} 
                                     />
+
+                                    {formData.logoImage ? (
+                                        <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto md:mx-0 rounded-xl overflow-hidden border border-white/10 group">
+                                            <img src={formData.logoImage} alt="Logo Preview" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <Button type="button" variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-full w-10 h-10" onClick={() => setFormData(prev => ({ ...prev, logoImage: '' }))}>
+                                                    <X className="w-5 h-5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            onClick={() => logoInputRef.current?.click()}
+                                            className="w-32 h-32 md:w-40 md:h-40 mx-auto md:mx-0 border-2 border-dashed border-white/20 hover:border-[#3B82F6]/50 rounded-xl bg-[#121212]/50 hover:bg-[#3B82F6]/5 transition-all cursor-pointer flex flex-col items-center justify-center space-y-3"
+                                        >
+                                            {isUploading.logo ? (
+                                                <Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" />
+                                            ) : (
+                                                <div className="flex flex-col items-center p-4">
+                                                    <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
+                                                    <p className="text-xs text-center text-gray-300 font-medium">Upload Logo</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
