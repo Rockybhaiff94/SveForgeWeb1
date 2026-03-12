@@ -25,7 +25,7 @@ export function DashboardServerList() {
     useEffect(() => {
         const fetchMyServers = async () => {
              try {
-                 const res = await fetch('/api/servers/user', {
+                 const res = await fetch(`/api/servers/user?t=${Date.now()}`, {
                      headers: {
                          'Cache-Control': 'no-cache, no-store, must-revalidate'
                      }
