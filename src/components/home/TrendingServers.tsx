@@ -89,7 +89,7 @@ export function TrendingServers() {
                                 <div className="flex items-center justify-between w-full mt-auto">
                                     <div className="flex items-center gap-1.5 text-gray-400 text-sm bg-black/30 px-3 py-1.5 rounded-lg border border-white/5">
                                         <Users className="w-4 h-4 text-[#3B82F6]" />
-                                        <span>{server.players} Online</span>
+                                        <span>{server.players ?? 0}</span>
                                     </div>
                                     <Link href={`/server/${server.slug || server._id}`}>
                                         <Button size="sm" className="bg-white/10 hover:bg-orange-500 hover:text-white text-gray-300 px-4 transition-all">

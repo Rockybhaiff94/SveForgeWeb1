@@ -159,8 +159,7 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                         <div className="flex items-center gap-1.5" title="Online Players">
                             <Users className="w-3.5 h-3.5 text-[#3B82F6]" />
                             <span>
-                                {server.players !== undefined ? server.players : 0} 
-                                {server.players_max ? ` / ${server.players_max}` : ""} players
+                                {server.players ?? 0}
                             </span>
                         </div>
                         <div className="flex items-center gap-1.5" title="Server Ping">

@@ -143,12 +143,10 @@ export function DashboardServerList() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
-                            {/* Players Card */}
-                            <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl flex flex-col items-center justify-center transition-colors group-hover:bg-white/[0.04]">
+                            <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl flex flex-col items-center justify-center transition-colors group-hover:bg-white/[0.04] min-h-[50px]">
                                 <span className="text-sm font-bold text-white">
-                                    {server.players} {server.players_max ? `/ ${server.players_max}` : ''}
+                                    {server.players ?? 0}
                                 </span>
-                                <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Players</span>
                             </div>
                             <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl flex flex-col items-center justify-center transition-colors group-hover:bg-white/[0.04]">
                                 <span className="text-sm font-bold text-white flex items-center gap-1">
