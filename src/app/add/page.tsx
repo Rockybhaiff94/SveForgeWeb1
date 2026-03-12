@@ -42,29 +42,41 @@ export default function AddServerPage() {
 
         try {
             // 1. Get the Presigned URL from our Next.js API
-            const res = await fetch('/api/upload/url', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: file.name, fileType: file.type })
-            });
-
-            const data = await res.json();
+            let data;
+            try {
+                const res = await fetch('/api/upload/url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fileName: file.name, fileType: file.type })
+                });
+                data = await res.json();
+            } catch (err: any) {
+                throw new Error(`API connection failed: ${err.message}`);
+            }
             
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to get upload URL');
+            if (!data?.success) {
+                throw new Error(data?.error || 'Failed to get upload URL from server');
             }
 
             // 2. Upload the raw file directly to Amazon S3
-            const uploadRes = await fetch(data.uploadUrl, {
-                method: 'PUT',
-                body: file,
-                headers: {
-                    'Content-Type': file.type,
-                },
-            });
+            try {
+                const uploadRes = await fetch(data.uploadUrl, {
+                    method: 'PUT',
+                    body: file,
+                    headers: {
+                        'Content-Type': file.type,
+                    },
+                });
 
-            if (!uploadRes.ok) {
-                throw new Error('Failed to upload image to S3');
+                if (!uploadRes.ok) {
+                    throw new Error(`Failed to upload to Amazon S3 (HTTP ${uploadRes.status})`);
+                }
+            } catch (err: any) {
+                // Determine if it is a CORS block resulting in a fetch failure
+                if (err.message === 'Failed to fetch') {
+                    throw new Error('AWS S3 CORS Error Blocked the Upload. Please ensure you added the exact CORS JSON policy into your S3 Bucket Permissions tab.');
+                }
+                throw err;
             }
 
             // 3. Save the final public URL
