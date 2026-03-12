@@ -5,6 +5,7 @@ import { TopRankedServers } from "@/components/home/TopRankedServers";
 import { TrendingServers } from "@/components/home/TrendingServers";
 import { ServerCategories } from "@/components/home/ServerCategories";
 import { GameServerLists } from "@/components/home/GameServerLists";
+import { AutoRefresh } from "@/components/ui/AutoRefresh";
 
 export const metadata: Metadata = {
     title: "Home - ServerForge Discovery",
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
 export default function HomePage() {
     return (
         <div className="space-y-0 pb-12 w-full max-w-[1600px] mx-auto">
+            <AutoRefresh intervalMs={60000} />
+            
             {/* Section 1: Featured Banner / Server News */}
             <FeaturedBanner />
 

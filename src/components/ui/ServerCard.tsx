@@ -15,8 +15,9 @@ interface ServerCardProps {
         tags: string[];
         votes: number;
         ratingAverage: number;
-        status: "online" | "offline";
+        status: "online" | "offline" | "full";
         players?: number;
+        players_max?: number;
         votesLast7Days?: number;
         totalRatings?: number;
         ping?: number; // Optional mock for design
@@ -86,12 +87,17 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                         {server.status === "online" ? (
                             <>
                                 <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-                                <span className="text-[10px] font-bold text-green-400 tracking-wider">ACTIVE</span>
+                                <span className="text-[10px] font-bold text-green-400 tracking-wider">ONLINE</span>
+                            </>
+                        ) : server.status === "full" ? (
+                            <>
+                                <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+                                <span className="text-[10px] font-bold text-orange-400 tracking-wider">FULL</span>
                             </>
                         ) : (
                             <>
                                 <span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                                <span className="text-[10px] font-bold text-red-400 tracking-wider">INACTIVE</span>
+                                <span className="text-[10px] font-bold text-red-400 tracking-wider">OFFLINE</span>
                             </>
                         )}
                     </div>
@@ -150,7 +156,10 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5" title="Online Players">
                             <Users className="w-3.5 h-3.5 text-[#3B82F6]" />
-                            <span>{server.players !== undefined ? server.players : 0}</span>
+                            <span>
+                                {server.players !== undefined ? server.players : 0} 
+                                {server.players_max ? ` / ${server.players_max}` : ""} players
+                            </span>
                         </div>
                         <div className="flex items-center gap-1.5" title="Server Ping">
                             <Activity className="w-3.5 h-3.5 text-emerald-400" />

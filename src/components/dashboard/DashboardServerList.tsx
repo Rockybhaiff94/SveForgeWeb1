@@ -11,6 +11,7 @@ interface ServerProps {
     gameType: string;
     status: string;
     players: number;
+    players_max?: number;
     votes: number;
     ratingAverage: number;
     logoImage?: string;
@@ -39,6 +40,10 @@ export function DashboardServerList() {
         };
 
         fetchMyServers();
+
+        // Implement 60-second polling for live status updates
+        const interval = setInterval(fetchMyServers, 60000);
+        return () => clearInterval(interval);
     }, [toast]);
 
     if (isLoading) {
@@ -98,18 +103,24 @@ export function DashboardServerList() {
                                     <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest truncate">{server.gameType}</p>
                                 </div>
                             </div>
-                            <div className={`text-[10px] px-2 py-0.5 rounded-full border font-black uppercase tracking-widest ${server.status === 'online'
+                            <div className={`text-[10px] px-2 py-0.5 rounded-full border font-black uppercase tracking-widest ${
+                                server.status === 'online'
                                     ? 'bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_8px_rgba(34,197,94,0.1)]'
-                                    : 'bg-red-500/10 text-red-400 border-red-500/20'
-                                }`}>
-                                {server.status === 'online' ? 'Online' : 'Offline'}
+                                    : server.status === 'full'
+                                        ? 'bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_8px_rgba(249,115,22,0.1)]'
+                                        : 'bg-red-500/10 text-red-400 border-red-500/20'
+                            }`}>
+                                {server.status === 'online' ? 'Online' : server.status === 'full' ? 'Full' : 'Offline'}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
+                            {/* Players Card */}
                             <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl flex flex-col items-center justify-center transition-colors group-hover:bg-white/[0.04]">
-                                <span className="text-sm font-bold text-white">{server.votes || 0}</span>
-                                <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Votes</span>
+                                <span className="text-sm font-bold text-white">
+                                    {server.players} {server.players_max ? `/ ${server.players_max}` : ''}
+                                </span>
+                                <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Players</span>
                             </div>
                             <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl flex flex-col items-center justify-center transition-colors group-hover:bg-white/[0.04]">
                                 <span className="text-sm font-bold text-white flex items-center gap-1">

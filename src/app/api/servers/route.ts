@@ -118,6 +118,7 @@ export async function POST(req: NextRequest) {
         // Minecraft Verification Step
         let isOnline = false;
         let playersOnline = 0;
+        let playersMax = 0;
         let serverStatus = 'offline';
 
         if (body.gameType === 'Minecraft') {
@@ -137,8 +138,15 @@ export async function POST(req: NextRequest) {
                 // Case 1: Online!
                 if (pingData.online === true) {
                     isOnline = true;
-                    serverStatus = 'online';
                     playersOnline = pingData.players?.online || 0;
+                    playersMax = pingData.players?.max || 0;
+
+                    // Compute specific online or full status
+                    if (playersMax > 0 && playersOnline >= playersMax) {
+                        serverStatus = 'full';
+                    } else {
+                        serverStatus = 'online';
+                    }
                 } 
                 // Case 3: Invalid (DNS cannot resolve it and there is no trace of the server)
                 else if (pingData.error === "Invalid hostname or IP address" || pingData.error === "DNS lookup failed") {
@@ -152,6 +160,7 @@ export async function POST(req: NextRequest) {
                      isOnline = false;
                      serverStatus = 'offline';
                      playersOnline = 0;
+                     playersMax = 0;
                 }
             } catch (err: any) {
                 console.error("Minecraft Ping Error:", err);
@@ -159,6 +168,7 @@ export async function POST(req: NextRequest) {
                  isOnline = false;
                  serverStatus = 'offline';
                  playersOnline = 0;
+                 playersMax = 0;
             }
         } 
         
@@ -186,7 +196,9 @@ export async function POST(req: NextRequest) {
             ratingAverage: 0,
             totalRatings: 0,
             status: serverStatus,
-            players: playersOnline
+            players: playersOnline,
+            players_max: playersMax,
+            last_checked: new Date()
         });
 
         await newServer.save();

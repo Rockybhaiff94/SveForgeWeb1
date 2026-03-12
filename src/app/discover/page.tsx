@@ -2,6 +2,7 @@ import React from "react";
 import { ServerCard } from "@/components/ui/ServerCard";
 import { Button } from "@/components/ui/Button";
 import { Filter, SortDesc, TrendingUp } from "lucide-react";
+import { AutoRefresh } from "@/components/ui/AutoRefresh";
 
 // Mock data for initial UI rendering
 const MOCK_SERVERS = [
@@ -82,6 +83,8 @@ const MOCK_SERVERS = [
 export default function DiscoverPage() {
     return (
         <div className="space-y-8">
+            <AutoRefresh intervalMs={60000} />
+            
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
