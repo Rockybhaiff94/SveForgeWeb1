@@ -1,84 +1,119 @@
 "use client";
 
-import React from "react";
-import { Star, MessageSquare, ArrowUpCircle, Edit3, Eye, Globe } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import React, { useEffect, useState } from "react";
+import { Star, MessageSquare, ArrowUpCircle, Edit3, Eye, Globe, PlusCircle, Server as ServerIcon } from "lucide-react";
+import Link from "next/link";
+import { useToast } from "@/components/ui/ToastContext";
 
-const myServers = [
-    {
-        id: "1",
-        name: "Hypixel Network",
-        type: "Minecraft / Mini-Games",
-        status: "Online",
-        players: "12,450",
-        votes: "2,430",
-        rating: "4.9",
-        logo: "https://api.dicebear.com/7.x/shapes/svg?seed=hypixel&backgroundColor=b6e3f4",
-    },
-    {
-        id: "2",
-        name: "Mineplex",
-        type: "Minecraft / Survival",
-        status: "Online",
-        players: "8,200",
-        votes: "1,120",
-        rating: "4.7",
-        logo: "https://api.dicebear.com/7.x/shapes/svg?seed=mineplex&backgroundColor=ffdfbf",
-    },
-    {
-        id: "3",
-        name: "Wynncraft",
-        type: "Minecraft / RPG",
-        status: "Offline",
-        players: "0",
-        votes: "890",
-        rating: "4.8",
-        logo: "https://api.dicebear.com/7.x/shapes/svg?seed=wynncraft&backgroundColor=c1f4c1",
-    },
-];
+interface ServerProps {
+    _id: string;
+    serverName: string;
+    gameType: string;
+    status: string;
+    players: number;
+    votes: number;
+    ratingAverage: number;
+    logoImage?: string;
+}
 
 export function DashboardServerList() {
+    const [servers, setServers] = useState<ServerProps[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const fetchMyServers = async () => {
+             try {
+                 const res = await fetch('/api/user/profile');
+                 const data = await res.json();
+                 
+                 if (res.ok && data.user?.servers) {
+                     setServers(data.user.servers);
+                 }
+             } catch (err) {
+                 console.error("Failed to load user servers", err);
+                 toast('error', 'Error Loading Servers', 'Failed to retrieve your server list.');
+             } finally {
+                 setIsLoading(false);
+             }
+        };
+
+        fetchMyServers();
+    }, [toast]);
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 space-y-4">
+                 <div className="w-12 h-12 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+                 <p className="text-gray-400 text-sm font-semibold animate-pulse tracking-widest uppercase">Loading your servers...</p>
+            </div>
+        );
+    }
+
+    if (servers.length === 0) {
+        return (
+             <div className="bg-[#121212]/50 border border-white/[0.05] rounded-3xl p-12 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-blue-500/20 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                
+                <div className="w-20 h-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(59,130,246,0.15)] relative z-10 group-hover:scale-110 transition-transform duration-500">
+                    <ServerIcon className="w-10 h-10 text-blue-400" />
+                </div>
+                
+                <h3 className="text-2xl font-black text-white mb-2 relative z-10">No servers added yet</h3>
+                <p className="text-gray-400 max-w-md mx-auto mb-8 relative z-10 text-sm leading-relaxed">
+                    You haven&apos;t added any servers to ServerForge yet. Start by registering your first game server to climb the community rankings.
+                </p>
+                
+                <Link href="/add" className="relative z-10">
+                    <button className="px-8 py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] hover:-translate-y-1 active:scale-95 flex items-center gap-3">
+                        <PlusCircle className="w-5 h-5" /> Add Your First Server
+                    </button>
+                </Link>
+             </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Globe className="w-5 h-5 text-orange-500" /> My Servers
+                    <Globe className="w-5 h-5 text-blue-500" /> My Servers
                 </h3>
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{myServers.length} Servers Total</span>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{servers.length} Servers Total</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myServers.map((server) => (
+                {servers.map((server) => (
                     <div
-                        key={server.id}
+                        key={server._id}
                         className="group bg-white/[0.03] border border-white/[0.06] rounded-[14px] p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-white/[0.05] hover:border-white/[0.1] hover:shadow-[0_0_20px_rgba(255,255,255,0.02)] relative overflow-hidden"
                     >
                         <div className="flex items-start justify-between mb-4 relative z-10">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-                                    <img src={server.logo} alt={server.name} className="w-8 h-8 object-contain" />
+                                    <img src={server.logoImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${server.serverName}&backgroundColor=0f172a`} alt={server.serverName} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="max-w-[140px]">
-                                    <h4 className="font-bold text-white text-lg truncate mb-0.5">{server.name}</h4>
-                                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest truncate">{server.type}</p>
+                                    <h4 className="font-bold text-white text-lg truncate mb-0.5">{server.serverName}</h4>
+                                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest truncate">{server.gameType}</p>
                                 </div>
                             </div>
-                            <div className={`text-[10px] px-2 py-0.5 rounded-full border font-black uppercase tracking-widest ${server.status === 'Online'
+                            <div className={`text-[10px] px-2 py-0.5 rounded-full border font-black uppercase tracking-widest ${server.status === 'online'
                                     ? 'bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_8px_rgba(34,197,94,0.1)]'
                                     : 'bg-red-500/10 text-red-400 border-red-500/20'
                                 }`}>
-                                {server.status}
+                                {server.status === 'online' ? 'Online' : 'Offline'}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
                             <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl flex flex-col items-center justify-center transition-colors group-hover:bg-white/[0.04]">
-                                <span className="text-sm font-bold text-white">{server.votes}</span>
+                                <span className="text-sm font-bold text-white">{server.votes || 0}</span>
                                 <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Votes</span>
                             </div>
                             <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl flex flex-col items-center justify-center transition-colors group-hover:bg-white/[0.04]">
                                 <span className="text-sm font-bold text-white flex items-center gap-1">
-                                    {server.rating} <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
+                                    {server.ratingAverage ? server.ratingAverage.toFixed(1) : "0.0"} <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
                                 </span>
                                 <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Rating</span>
                             </div>
@@ -88,10 +123,12 @@ export function DashboardServerList() {
                             <button className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center justify-center gap-2">
                                 <Edit3 className="w-3 h-3" /> Edit
                             </button>
-                            <button className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center justify-center gap-2">
-                                <Eye className="w-3 h-3" /> View
-                            </button>
-                            <button className="p-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 rounded-lg transition-all flex items-center justify-center group/btn shadow-[0_0_10px_rgba(245,158,11,0.05)]">
+                            <Link href={`/server/${server._id}`} className="flex-1">
+                                <button className="w-full py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center justify-center gap-2">
+                                    <Eye className="w-3 h-3" /> View
+                                </button>
+                            </Link>
+                            <button aria-label="Bump Server" title="Bump Server" className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg transition-all flex items-center justify-center group/btn shadow-[0_0_10px_rgba(59,130,246,0.05)]">
                                 <ArrowUpCircle className="w-4 h-4 transition-transform group-hover/btn:scale-110" />
                             </button>
                         </div>

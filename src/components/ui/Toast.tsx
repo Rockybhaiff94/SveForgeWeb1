@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, X, Loader2 } from 'lucide-react';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'loading';
 
 export interface ToastProps {
     id: string;
@@ -23,13 +23,15 @@ export function Toast({ id, type, message, description, duration = 5000, onClose
     const icons = {
         success: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
         error: <AlertCircle className="w-5 h-5 text-rose-500" />,
-        info: <Info className="w-5 h-5 text-blue-400" />
+        info: <Info className="w-5 h-5 text-blue-400" />,
+        loading: <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
     };
 
     const containerStyles = {
         success: 'bg-[#0f172a] border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)]',
         error: 'bg-[#0f172a] border-rose-500/30 shadow-[0_0_20px_rgba(244,63,94,0.15)]',
-        info: 'bg-[#0f172a] border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]'
+        info: 'bg-[#0f172a] border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]',
+        loading: 'bg-[#0f172a] border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.15)]'
     };
 
     return (
@@ -38,6 +40,7 @@ export function Toast({ id, type, message, description, duration = 5000, onClose
             <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none ${
                 type === 'success' ? 'bg-gradient-to-br from-emerald-500/10 to-transparent' : 
                 type === 'error' ? 'bg-gradient-to-br from-rose-500/10 to-transparent' : 
+                type === 'loading' ? 'bg-gradient-to-br from-purple-500/10 to-transparent' :
                 'bg-gradient-to-br from-blue-500/10 to-transparent'
             }`} />
 
@@ -49,6 +52,7 @@ export function Toast({ id, type, message, description, duration = 5000, onClose
                 <p className={`text-sm font-semibold truncate ${
                     type === 'success' ? 'text-emerald-100' :
                     type === 'error' ? 'text-rose-100' :
+                    type === 'loading' ? 'text-purple-100' :
                     'text-blue-100'
                 }`}>
                     {message}
@@ -76,6 +80,7 @@ export function Toast({ id, type, message, description, duration = 5000, onClose
                     className={`absolute bottom-0 left-0 h-0.5 animate-shrink ${
                         type === 'success' ? 'bg-emerald-500/50' : 
                         type === 'error' ? 'bg-rose-500/50' : 
+                        type === 'loading' ? 'bg-purple-500/50' :
                         'bg-blue-500/50'
                     }`}
                     style={{ animationDuration: `${duration}ms`, animationName: 'shrinkWidth', animationTimingFunction: 'linear', animationFillMode: 'forwards' }}

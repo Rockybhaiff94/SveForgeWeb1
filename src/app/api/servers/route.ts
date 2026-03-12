@@ -115,6 +115,58 @@ export async function POST(req: NextRequest) {
             formattedTags = body.tags;
         }
 
+        // Minecraft Verification Step
+        let isOnline = false;
+        let playersOnline = 0;
+        let serverStatus = 'offline';
+
+        if (body.gameType === 'Minecraft') {
+            try {
+                // Fetch from the latest v3 API of mcsrvstat.us 
+                const address = body.port !== '25565' && body.port ? `${body.serverIP}:${body.port}` : body.serverIP;
+                const pingRes = await fetch(`https://api.mcsrvstat.us/3/${address}`, {
+                    next: { revalidate: 0 } // never cache this network request
+                });
+                
+                if (!pingRes.ok) {
+                    throw new Error('Ping API request failed.');
+                }
+
+                const pingData = await pingRes.json();
+                
+                // Case 1: Online!
+                if (pingData.online === true) {
+                    isOnline = true;
+                    serverStatus = 'online';
+                    playersOnline = pingData.players?.online || 0;
+                } 
+                // Case 3: Invalid (DNS cannot resolve it and there is no trace of the server)
+                else if (pingData.error === "Invalid hostname or IP address" || pingData.error === "DNS lookup failed") {
+                    return NextResponse.json({ 
+                        success: false, 
+                        error: "Server could not be verified. Invalid IP or domain." 
+                    }, { status: 400 });
+                }
+                // Case 2: Offline but Valid hostname
+                else {
+                     isOnline = false;
+                     serverStatus = 'offline';
+                     playersOnline = 0;
+                }
+            } catch (err: any) {
+                console.error("Minecraft Ping Error:", err);
+                // We fallback to treating it as valid but offline if the third-party ping tool crashes
+                 isOnline = false;
+                 serverStatus = 'offline';
+                 playersOnline = 0;
+            }
+        } 
+        
+        // Define baseline status message based on verification result
+        const statusMessage = isOnline 
+            ? "Server verified successfully and is ONLINE." 
+            : "Server is currently OFFLINE but successfully added.";
+
         // Create the server object
         const newServer = new Server({
             serverName: body.name,
@@ -132,15 +184,19 @@ export async function POST(req: NextRequest) {
             isApproved: false, // Servers MUST be approved by admins 
             votes: 0,
             ratingAverage: 0,
-            totalRatings: 0
+            totalRatings: 0,
+            status: serverStatus,
+            players: playersOnline
         });
 
         await newServer.save();
 
         return NextResponse.json({ 
             success: true, 
-            message: "Server Added Successfully!",
-            serverId: newServer._id
+            message: statusMessage,
+            serverId: newServer._id,
+            verified: true,
+            isOnline: isOnline
         });
 
     } catch (error: any) {

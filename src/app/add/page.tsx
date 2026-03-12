@@ -21,7 +21,7 @@ export default function AddServerPage() {
         websiteURL: "",
     });
     
-    const { toast } = useToast();
+    const { toast, dismiss } = useToast();
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState({ banner: false, logo: false });
@@ -40,7 +40,7 @@ export default function AddServerPage() {
         
         if (isSubmitting) return;
         setIsSubmitting(true);
-        toast('info', 'Submitting Server...', 'We are validating your server details.');
+        const submitToastId = toast('loading', 'Checking server status...', 'Please wait while we verify your server details.', 0);
 
         try {
             const res = await fetch('/api/servers', {
@@ -50,12 +50,14 @@ export default function AddServerPage() {
             });
 
             const data = await res.json();
+            
+            dismiss(submitToastId);
 
             if (!res.ok) {
                 throw new Error(data.error || 'Failed to add server');
             }
 
-            toast('success', 'Server Added Successfully!', 'Your server has been submitted for review.');
+            toast('success', data.message || 'Server Added Successfully!', 'Your server has been submitted for review.');
             
             // Redirect after brief delay
             setTimeout(() => {
@@ -64,6 +66,7 @@ export default function AddServerPage() {
 
         } catch (error: any) {
             console.error('Submission error:', error);
+            if (submitToastId) dismiss(submitToastId);
             toast('error', 'Server Submission Failed', error.message || 'An unexpected error occurred. Please try again.');
             setIsSubmitting(false); // Only re-enable if failed
         }
@@ -73,12 +76,12 @@ export default function AddServerPage() {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
         if (!file.type.startsWith('image/')) {
-            alert('Please select an image file');
+            toast('error', 'Invalid File Type', 'Please select an image file (PNG, JPG, WEBP).');
             return;
         }
 
         setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: true }));
-        toast('info', `Uploading ${type === 'banner' ? 'Banner' : 'Logo'}...`, 'Please wait while we process this image to the cloud.', 0); // Permanent until finished
+        const uploadToastId = toast('loading', `Uploading ${type === 'banner' ? 'Banner' : 'Logo'}...`, 'Please wait while we process this image to the cloud.', 0); // Permanent until finished
 
         try {
             // 1. Get the Presigned URL from our Next.js API
@@ -122,10 +125,12 @@ export default function AddServerPage() {
             // 3. Save the final public URL
             setFormData(prev => ({ ...prev, [type === 'banner' ? 'bannerImage' : 'logoImage']: data.publicUrl }));
             
-            // Remove the permanent info toast from earlier by pushing a new success over it
+            // Remove the permanent loading toast from earlier explicitly
+            dismiss(uploadToastId);
             toast('success', `Upload Complete`, `Your ${type} has been securely stored in AWS S3.`);
         } catch (error: any) {
             console.error('Upload error:', error);
+            dismiss(uploadToastId);
             toast('error', 'Upload Failed', error.message || 'An error occurred during upload.');
         } finally {
             setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: false }));

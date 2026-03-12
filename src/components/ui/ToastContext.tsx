@@ -12,7 +12,7 @@ interface ToastData {
 }
 
 interface ToastContextType {
-    toast: (type: ToastType, message: string, description?: string, duration?: number) => void;
+    toast: (type: ToastType, message: string, description?: string, duration?: number) => string;
     dismiss: (id: string) => void;
 }
 
@@ -24,6 +24,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const toast = useCallback((type: ToastType, message: string, description?: string, duration = 5000) => {
         const id = Math.random().toString(36).substr(2, 9);
         setToasts(prev => [...prev, { id, type, message, description, duration }]);
+        return id;
     }, []);
 
     const dismiss = useCallback((id: string) => {
