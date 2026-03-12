@@ -1,50 +1,79 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { Server, TrendingUp, Users, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const stats = [
-    {
-        label: "Total Servers",
-        value: "3",
-        icon: Server,
-        color: "text-blue-500",
-        bg: "bg-blue-500/10",
-        border: "border-blue-500/20",
-        glow: "shadow-[0_0_15px_rgba(59,130,246,0.1)]"
-    },
-    {
-        label: "Total Votes",
-        value: "2,430",
-        icon: TrendingUp,
-        color: "text-orange-500",
-        bg: "bg-orange-500/10",
-        border: "border-orange-500/20",
-        glow: "shadow-[0_0_15px_rgba(245,158,11,0.1)]"
-    },
-    {
-        label: "Total Views",
-        value: "12,400",
-        icon: Users,
-        color: "text-blue-500",
-        bg: "bg-blue-500/10",
-        border: "border-blue-500/20",
-        glow: "shadow-[0_0_15px_rgba(59,130,246,0.1)]"
-    },
-    {
-        label: "Active Servers",
-        value: "2 Online",
-        icon: Activity,
-        color: "text-green-500",
-        bg: "bg-green-500/10",
-        border: "border-green-500/20",
-        glow: "shadow-[0_0_15px_rgba(34,197,94,0.1)]"
-    },
-];
-
 export function DashboardStats() {
+    const [statsData, setStatsData] = useState({
+        totalServers: 0,
+        activeServers: 0,
+        totalVotes: 0,
+        totalViews: 0
+    });
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardStats = async () => {
+            try {
+                // First ping the profile check to ensure valid session if needed, but our route handles auth checks
+                const res = await fetch('/api/user/dashboard-stats');
+                const json = await res.json();
+                if (json.success) {
+                    setStatsData(json.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch dashboard stats", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardStats();
+    }, []);
+
+    const dynamicStats = [
+        {
+            label: "Total Servers",
+            value: isLoading ? "..." : statsData.totalServers.toLocaleString(),
+            icon: Server,
+            color: "text-blue-500",
+            bg: "bg-blue-500/10",
+            border: "border-blue-500/20",
+            glow: "shadow-[0_0_15px_rgba(59,130,246,0.1)]"
+        },
+        {
+            label: "Total Votes",
+            value: isLoading ? "..." : statsData.totalVotes.toLocaleString(),
+            icon: TrendingUp,
+            color: "text-orange-500",
+            bg: "bg-orange-500/10",
+            border: "border-orange-500/20",
+            glow: "shadow-[0_0_15px_rgba(245,158,11,0.1)]"
+        },
+        {
+            label: "Total Views",
+            value: isLoading ? "..." : statsData.totalViews.toLocaleString(),
+            icon: Users,
+            color: "text-blue-500",
+            bg: "bg-blue-500/10",
+            border: "border-blue-500/20",
+            glow: "shadow-[0_0_15px_rgba(59,130,246,0.1)]"
+        },
+        {
+            label: "Active Servers",
+            value: isLoading ? "..." : `${statsData.activeServers} Online`,
+            icon: Activity,
+            color: "text-green-500",
+            bg: "bg-green-500/10",
+            border: "border-green-500/20",
+            glow: "shadow-[0_0_15px_rgba(34,197,94,0.1)]"
+        },
+    ];
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, i) => (
+            {dynamicStats.map((stat, i) => (
                 <div
                     key={i}
                     className={cn(

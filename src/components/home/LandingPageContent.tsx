@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { LandingNavBar } from "@/components/home/LandingNavBar";
@@ -94,6 +94,32 @@ const GAME_CATEGORIES = [
 ];
 
 export default function LandingPageContent() {
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        totalServers: 0,
+        onlineServers: 0,
+        totalVotes: 0,
+    });
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/stats');
+                const json = await res.json();
+                if (json.success) {
+                    setStats(json.data);
+                }
+            } catch (error) {
+                console.error("Failed to load server forge stats:", error);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
     return (
         <div className="w-full relative pb-20">
             {/* Background Globals */}
@@ -115,7 +141,7 @@ export default function LandingPageContent() {
                 >
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1A1A22] border border-white/5 mb-6 text-sm font-medium text-[#9CA3AF]">
                         <span className="flex h-2 w-2 rounded-full bg-[#10B981]"></span>
-                        Over 25,000 servers listed
+                        {isLoadingStats ? "Loading servers..." : `${stats.totalServers > 0 ? stats.totalServers.toLocaleString() : 'Discover the best'} servers listed`}
                     </div>
                     <h1 className="text-5xl lg:text-7xl font-extrabold text-[#FFFFFF] tracking-tight leading-[1.1] mb-6">
                         Discover the Best <br />
@@ -124,7 +150,7 @@ export default function LandingPageContent() {
                     <p className="text-xl text-[#9CA3AF] mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                         Find and join Minecraft, FiveM, Rust, and CS2 servers in seconds. Join massive communities or create your own legacy.
                     </p>
-                    <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start mb-12">
                         <Link href="/home" className="w-full sm:w-auto">
                             <Button size="lg" className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all h-14 px-8 text-lg hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]">
                                 Explore Servers <ArrowRight className="ml-2 w-5 h-5" />
@@ -135,6 +161,26 @@ export default function LandingPageContent() {
                                 Add Your Server
                             </Button>
                         </Link>
+                    </div>
+
+                    {/* Live Statistics Row underneath Hero CTA */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto lg:mx-0 bg-white/[0.02] p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+                         <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+                              <span className="text-[#3B82F6] font-black text-2xl">{isLoadingStats ? "..." : stats.totalServers.toLocaleString()}</span>
+                              <span className="text-xs text-gray-400 font-medium uppercase tracking-wider mt-1">Total Servers</span>
+                         </div>
+                         <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+                              <span className="text-emerald-400 font-black text-2xl">{isLoadingStats ? "..." : stats.onlineServers.toLocaleString()}</span>
+                              <span className="text-xs text-gray-400 font-medium uppercase tracking-wider mt-1">Servers Online</span>
+                         </div>
+                         <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+                              <span className="text-[#8B5CF6] font-black text-2xl">{isLoadingStats ? "..." : stats.totalVotes.toLocaleString()}</span>
+                              <span className="text-xs text-gray-400 font-medium uppercase tracking-wider mt-1">Total Votes</span>
+                         </div>
+                         <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+                              <span className="text-[#F59E0B] font-black text-2xl">{isLoadingStats ? "..." : stats.totalUsers.toLocaleString()}</span>
+                              <span className="text-xs text-gray-400 font-medium uppercase tracking-wider mt-1">Players Ready</span>
+                         </div>
                     </div>
                 </motion.div>
 

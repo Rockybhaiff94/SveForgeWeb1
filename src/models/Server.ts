@@ -52,6 +52,15 @@ const ServerSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    status: {
+        type: String,
+        enum: ['online', 'offline'],
+        default: 'offline',
+    },
+    players: {
+        type: Number,
+        default: 0,
+    },
     lastBumpAt: {
         type: Date,
         default: Date.now,
