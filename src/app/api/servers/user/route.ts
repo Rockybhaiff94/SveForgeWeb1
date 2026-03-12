@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Server from '@/models/Server';
-import { getSessionUser } from '@/lib/auth-util';
+import { verifyToken } from '@/lib/auth-util';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -9,15 +9,14 @@ export const revalidate = 0;
 export async function GET() {
     try {
         await dbConnect();
-        const user = await getSessionUser();
+        const session = await verifyToken();
 
-        if (!user || (!user.discordId && !user.userId)) {
+        if (!session || !session.userId) {
             return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
         }
 
-        // We assume ownerId in Server maps to the custom user session userId or discordId
-        // From previous code, server saves `ownerId: session.userId`
-        const servers = await Server.find({ ownerId: user.userId || user.discordId }).sort({ createdAt: -1 });
+        // Retrieve exactly the servers where ownerId matches the user's MongoDB `_id`
+        const servers = await Server.find({ ownerId: session.userId }).sort({ createdAt: -1 });
 
         return NextResponse.json({
             success: true,
