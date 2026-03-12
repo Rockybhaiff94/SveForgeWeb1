@@ -133,7 +133,7 @@ export default function TrendingClient() {
                                         </h2>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
                                             {topServers.map((server, index) => (
-                                                <div key={server.slug} className={`animate-in fade-in zoom-in-95 duration-500 delay-${index * 100} ${index === 0 ? 'md:col-span-2 lg:col-span-1 lg:-translate-y-4' : ''}`}>
+                                                <div key={server._id || index} className={`animate-in fade-in zoom-in-95 duration-500 delay-${index * 100} ${index === 0 ? 'md:col-span-2 lg:col-span-1 lg:-translate-y-4' : ''}`}>
                                                     <ServerCard
                                                         server={server}
                                                         rank={index + 1}
@@ -149,7 +149,7 @@ export default function TrendingClient() {
                                 {restServers.length > 0 && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
                                         {restServers.map((server, index) => (
-                                            <div key={server.slug} className={`animate-in fade-in slide-in-from-bottom-4 duration-500`}>
+                                            <div key={server._id || index} className={`animate-in fade-in slide-in-from-bottom-4 duration-500`}>
                                                 <ServerCard
                                                     server={server}
                                                     rank={topServers.length + index + 1}

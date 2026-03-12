@@ -51,7 +51,7 @@ export function TopRankedServers() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {servers.map((server, index) => (
-                        <div key={server.slug} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+                        <div key={server._id || index} className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
                             <ServerCard server={server} rank={index + 1} isTopRated />
                         </div>
                     ))}

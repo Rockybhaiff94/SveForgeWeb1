@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/Button";
 
 interface ServerCardProps {
     server: {
-        name: string;
-        slug: string;
+        name?: string;
+        serverName?: string;
+        slug?: string;
+        _id?: string;
         description: string;
         bannerImage: string | null;
         logoImage: string | null;
@@ -65,7 +67,7 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                     {server.bannerImage ? (
                         <Image
                             src={server.bannerImage}
-                            alt={`${server.name} banner`}
+                            alt={`${server.serverName || server.name} banner`}
                             fill
                             className="object-cover transition-transform duration-200 group-hover:scale-[1.03] opacity-90"
                         />
@@ -106,7 +108,7 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                 {/* Server Logo (Overlapping bottom-left) */}
                 <div className="absolute -bottom-6 left-4 rounded-[40%] overflow-hidden border border-[#3B82F6]/30 bg-[#050505] w-[64px] h-[64px] shadow-lg z-30 flex items-center justify-center">
                     {server.logoImage ? (
-                        <Image src={server.logoImage} alt={server.name} fill className="object-cover" />
+                        <Image src={server.logoImage} alt={server.serverName || server.name || "Logo"} fill className="object-cover" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3B82F6]/10 to-[#60A5FA]/10">
                             <Server className="w-8 h-8 text-[#60A5FA]/50" />
@@ -119,8 +121,8 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
             <CardContent className="flex flex-col flex-grow pt-9 pb-5 px-5 z-10">
                 {/* Main Info Row */}
                 <div className="flex justify-between items-start mb-2 gap-3">
-                    <Link href={`/server/${server.slug}`} className="hover:text-[#3B82F6] transition-colors flex-1 min-w-0">
-                        <h2 className="text-xl font-bold truncate text-white tracking-tight">{server.name}</h2>
+                    <Link href={`/server/${server.slug || server._id}`} className="hover:text-[#3B82F6] transition-colors flex-1 min-w-0">
+                        <h2 className="text-xl font-bold truncate text-white tracking-tight">{server.serverName || server.name}</h2>
                     </Link>
                     {/* Region Badge */}
                     <div className="shrink-0 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
@@ -182,14 +184,14 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
-                    <Link href={`/server/${server.slug}`} className="flex-1">
+                    <Link href={`/server/${server.slug || server._id}`} className="flex-1">
                         <Button
                             className="w-full h-10 rounded-lg bg-[var(--color-online)] hover:bg-[var(--color-online)] hover:brightness-110 font-bold text-white tracking-wide transition-all duration-200 border-none uppercase shadow-none hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:-translate-y-0.5"
                         >
                             Join
                         </Button>
                     </Link>
-                    <Link href={`/vote/${server.slug}`} className="flex-1">
+                    <Link href={`/vote/${server.slug || server._id}`} className="flex-1">
                         <Button
                             className="w-full h-10 rounded-lg bg-[#3B82F6] hover:bg-[#60A5FA] font-bold text-white tracking-wide transition-all duration-200 border-none uppercase shadow-none hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] hover:-translate-y-0.5"
                         >

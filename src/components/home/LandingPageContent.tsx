@@ -216,7 +216,7 @@ export default function LandingPageContent() {
                              </div>
                         ) : featuredServers.map((server, idx) => (
                             <motion.div
-                                key={server.slug}
+                                key={server._id || idx}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}

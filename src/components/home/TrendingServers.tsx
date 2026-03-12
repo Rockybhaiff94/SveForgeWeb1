@@ -62,7 +62,7 @@ export function TrendingServers() {
                 <div className="flex overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 gap-5 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {servers.map((server, index) => (
                         <Card
-                            key={server.slug}
+                            key={server._id || index}
                             className="min-w-[280px] lg:min-w-[320px] shrink-0 snap-start bg-[#121212] border-white/5 hover:border-orange-500/30 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 shadow-lg shadow-black/40 hover:shadow-[0_0_30px_rgba(249,115,22,0.15)] group overflow-hidden relative"
                         >
                             {/* Glow effect in background */}
@@ -77,8 +77,8 @@ export function TrendingServers() {
                                     )}
                                 </div>
 
-                                <Link href={`/server/${server.slug}`} className="hover:text-orange-400 transition-colors w-full">
-                                    <h3 className="font-bold text-lg text-white truncate mb-1">{server.serverName}</h3>
+                                <Link href={`/server/${server.slug || server._id}`} className="hover:text-orange-400 transition-colors w-full">
+                                    <h3 className="font-bold text-lg text-white truncate mb-1">{server.serverName || server.name}</h3>
                                 </Link>
 
                                 <div className="flex items-center gap-1.5 text-emerald-400 font-medium text-sm mb-4">
@@ -91,7 +91,7 @@ export function TrendingServers() {
                                         <Users className="w-4 h-4 text-[#3B82F6]" />
                                         <span>{server.players} Online</span>
                                     </div>
-                                    <Link href={`/server/${server.slug}`}>
+                                    <Link href={`/server/${server.slug || server._id}`}>
                                         <Button size="sm" className="bg-white/10 hover:bg-orange-500 hover:text-white text-gray-300 px-4 transition-all">
                                             Join
                                         </Button>
