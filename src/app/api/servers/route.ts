@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Server from "@/models/Server";
+import { verifyToken } from "@/lib/auth-util";
 
 export async function GET(req: NextRequest) {
     try {
@@ -87,5 +88,75 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error("Error fetching servers:", error);
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    }
+}
+
+export async function POST(req: NextRequest) {
+    try {
+        await dbConnect();
+        
+        const session = await verifyToken();
+        if (!session || !session.userId) {
+            return NextResponse.json({ success: false, error: "Unauthorized. Please login to add a server." }, { status: 401 });
+        }
+
+        const body = await req.json();
+        
+        // Basic validation
+        if (!body.name || !body.serverIP || !body.gameType) {
+            return NextResponse.json({ success: false, error: "Server Name, IP, and Game Type are required fields." }, { status: 400 });
+        }
+
+        // Format tags if provided as string
+        let formattedTags = [];
+        if (body.tags && typeof body.tags === 'string') {
+            formattedTags = body.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+        } else if (Array.isArray(body.tags)) {
+            formattedTags = body.tags;
+        }
+
+        // Create the server object
+        const newServer = new Server({
+            serverName: body.name,
+            ip: body.serverIP,
+            port: body.port || 25565,
+            gameType: body.gameType,
+            description: body.description,
+            bannerImage: body.bannerImage,
+            logoImage: body.logoImage,
+            discordURL: body.discordURL,
+            websiteURL: body.websiteURL,
+            tags: formattedTags,
+            ownerId: session.userId,
+            isPremium: false,
+            isApproved: false, // Servers MUST be approved by admins 
+            votes: 0,
+            ratingAverage: 0,
+            totalRatings: 0
+        });
+
+        await newServer.save();
+
+        return NextResponse.json({ 
+            success: true, 
+            message: "Server Added Successfully!",
+            serverId: newServer._id
+        });
+
+    } catch (error: any) {
+        console.error("Error creating server:", error);
+        
+        // Handle MongoDB Duplicate Key Error (e.g. Duplicate IP)
+        if (error.code === 11000) {
+            return NextResponse.json({ 
+                success: false, 
+                error: "This Server IP is already registered on ServerForge." 
+            }, { status: 400 });
+        }
+
+        return NextResponse.json({ 
+            success: false, 
+            error: "Failed to create server. Please verify your details." 
+        }, { status: 500 });
     }
 }

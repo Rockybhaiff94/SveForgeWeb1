@@ -3,6 +3,8 @@
 import React, { useState, useRef } from "react";
 import { Server, Image as ImageIcon, Link as LinkIcon, CheckCircle2, ChevronRight, ChevronLeft, UploadCloud, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/ToastContext";
+import { useRouter } from "next/navigation";
 
 export default function AddServerPage() {
     const [step, setStep] = useState(1);
@@ -19,6 +21,9 @@ export default function AddServerPage() {
         websiteURL: "",
     });
     
+    const { toast } = useToast();
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploading, setIsUploading] = useState({ banner: false, logo: false });
     const bannerInputRef = useRef<HTMLInputElement>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +35,40 @@ export default function AddServerPage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        toast('info', 'Submitting Server...', 'We are validating your server details.');
+
+        try {
+            const res = await fetch('/api/servers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to add server');
+            }
+
+            toast('success', 'Server Added Successfully!', 'Your server has been submitted for review.');
+            
+            // Redirect after brief delay
+            setTimeout(() => {
+                router.push('/dashboard/servers');
+            }, 1500);
+
+        } catch (error: any) {
+            console.error('Submission error:', error);
+            toast('error', 'Server Submission Failed', error.message || 'An unexpected error occurred. Please try again.');
+            setIsSubmitting(false); // Only re-enable if failed
+        }
+    };
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'logo') => {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
@@ -39,6 +78,7 @@ export default function AddServerPage() {
         }
 
         setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: true }));
+        toast('info', `Uploading ${type === 'banner' ? 'Banner' : 'Logo'}...`, 'Please wait while we process this image to the cloud.', 0); // Permanent until finished
 
         try {
             // 1. Get the Presigned URL from our Next.js API
@@ -81,9 +121,12 @@ export default function AddServerPage() {
 
             // 3. Save the final public URL
             setFormData(prev => ({ ...prev, [type === 'banner' ? 'bannerImage' : 'logoImage']: data.publicUrl }));
+            
+            // Remove the permanent info toast from earlier by pushing a new success over it
+            toast('success', `Upload Complete`, `Your ${type} has been securely stored in AWS S3.`);
         } catch (error: any) {
             console.error('Upload error:', error);
-            alert(error.message || 'An error occurred during upload.');
+            toast('error', 'Upload Failed', error.message || 'An error occurred during upload.');
         } finally {
             setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: false }));
         }
@@ -127,7 +170,7 @@ export default function AddServerPage() {
                 {/* Glow accent */}
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#3B82F6]/10 blur-[120px] rounded-full pointer-events-none" />
 
-                <form className="space-y-6 relative z-10" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
 
                     {/* STEP 1: Basic Info */}
                     {step === 1 && (
@@ -343,8 +386,21 @@ export default function AddServerPage() {
                                 Next Step <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         ) : (
-                            <Button type="submit" variant="glow" className="px-8 bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#34D399] hover:to-[#10B981] shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                                <CheckCircle2 className="w-4 h-4 mr-2" /> Submit Server
+                            <Button 
+                                type="submit" 
+                                variant="glow" 
+                                disabled={isSubmitting}
+                                className="px-8 bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#34D399] hover:to-[#10B981] shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all min-w-[180px]"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 mr-3 animate-spin" /> Adding server...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="w-5 h-5 mr-2" /> Submit Server
+                                    </>
+                                )}
                             </Button>
                         )}
                     </div>
