@@ -25,11 +25,15 @@ export function DashboardServerList() {
     useEffect(() => {
         const fetchMyServers = async () => {
              try {
-                 const res = await fetch('/api/user/profile');
+                 const res = await fetch('/api/servers/user', {
+                     headers: {
+                         'Cache-Control': 'no-cache, no-store, must-revalidate'
+                     }
+                 });
                  const data = await res.json();
                  
-                 if (res.ok && data.user?.servers) {
-                     setServers(data.user.servers);
+                 if (res.ok && data.success && Array.isArray(data.servers)) {
+                     setServers(data.servers);
                  }
              } catch (err) {
                  console.error("Failed to load user servers", err);
@@ -48,9 +52,33 @@ export function DashboardServerList() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                 <div className="w-12 h-12 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
-                 <p className="text-gray-400 text-sm font-semibold animate-pulse tracking-widest uppercase">Loading your servers...</p>
+            <div className="space-y-6">
+                <div className="flex justify-between items-center mb-6">
+                    <div className="h-6 w-32 bg-white/5 animate-pulse rounded-md" />
+                    <div className="h-4 w-24 bg-white/5 animate-pulse rounded-md" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white/[0.02] border border-white/[0.04] rounded-[14px] p-5 h-[180px] animate-pulse flex flex-col justify-between">
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-white/5" />
+                                <div className="space-y-2 flex-1">
+                                    <div className="h-5 bg-white/5 rounded-md w-3/4" />
+                                    <div className="h-3 bg-white/5 rounded-md w-1/2" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3 mb-2">
+                                <div className="h-[46px] rounded-xl bg-white/5" />
+                                <div className="h-[46px] rounded-xl bg-white/5" />
+                            </div>
+                            <div className="flex gap-2">
+                                <div className="h-[34px] rounded-lg bg-white/5 flex-1" />
+                                <div className="h-[34px] rounded-lg bg-white/5 flex-1" />
+                                <div className="h-[34px] w-[34px] rounded-lg bg-white/5" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }

@@ -61,6 +61,7 @@ export default function AddServerPage() {
             
             // Redirect after brief delay
             setTimeout(() => {
+                router.refresh(); // Invalidate client-side Next.js route cache
                 router.push('/dashboard/servers');
             }, 1500);
 
