@@ -1,18 +1,18 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { NextResponse, NextRequest } from 'next/server';
+import { verifyToken } from '@/lib/auth-util';
 import dbConnect from '@/lib/mongodb';
 import Server from '@/models/Server';
 import Vote from '@/models/Vote';
 import Analytics from '@/models/Analytics';
 
 export async function POST(
-    req: Request,
-    { params }: { params: { slug: string } }
+    req: NextRequest,
+    context: any // Bypassing Strict Next15+ Promise context constraints temporarily to resolve build failure
 ) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
+        const params = await context.params;
+        const session = await verifyToken();
+        if (!session) {
             return NextResponse.json({ success: false, error: 'Unauthorized. Please log in to vote.' }, { status: 401 });
         }
 
@@ -27,7 +27,7 @@ export async function POST(
             return NextResponse.json({ success: false, error: 'Server not found' }, { status: 404 });
         }
 
-        const userId = session.user.id;
+        const userId = session.userId;
         const serverId = server._id.toString();
 
         // Check if user has voted for this server in the last 24 hours

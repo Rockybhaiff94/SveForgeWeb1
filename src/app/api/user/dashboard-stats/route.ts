@@ -1,21 +1,20 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { NextResponse, NextRequest } from 'next/server';
+import { verifyToken } from '@/lib/auth-util';
 import dbConnect from '@/lib/mongodb';
 import Server from '@/models/Server';
 import Analytics from '@/models/Analytics';
 
 export const revalidate = 0; // Don't cache personalized dashboard data
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
+        const session = await verifyToken();
+        if (!session) {
             return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
         }
 
         await dbConnect();
-        const userId = session.user.id;
+        const userId = session.userId;
 
         // Fetch all servers owned by this user
         const servers = await Server.find({ ownerId: userId });
