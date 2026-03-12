@@ -178,8 +178,9 @@ export default function AddServerPage() {
                             <h2 className="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-4">Basic Information</h2>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-[#9CA3AF]">Server Name <span className="text-red-400">*</span></label>
+                                <label htmlFor="name" className="text-sm font-semibold text-[#9CA3AF]">Server Name <span className="text-red-400">*</span></label>
                                 <input
+                                    id="name"
                                     type="text" name="name" value={formData.name} onChange={handleChange}
                                     placeholder="e.g. Aetherial Network"
                                     className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
@@ -187,8 +188,9 @@ export default function AddServerPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-[#9CA3AF]">Game Type <span className="text-red-400">*</span></label>
+                                <label htmlFor="gameType" className="text-sm font-semibold text-[#9CA3AF]">Game Type <span className="text-red-400">*</span></label>
                                 <select
+                                    id="gameType"
                                     name="gameType" value={formData.gameType} onChange={handleChange}
                                     className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 appearance-none"
                                 >
@@ -203,16 +205,18 @@ export default function AddServerPage() {
 
                             <div className="grid grid-cols-3 gap-4">
                                 <div className="col-span-2 space-y-2">
-                                    <label className="text-sm font-semibold text-[#9CA3AF]">Server IP/Hostname <span className="text-red-400">*</span></label>
+                                    <label htmlFor="serverIP" className="text-sm font-semibold text-[#9CA3AF]">Server IP/Hostname <span className="text-red-400">*</span></label>
                                     <input
+                                        id="serverIP"
                                         type="text" name="serverIP" value={formData.serverIP} onChange={handleChange}
                                         placeholder="play.example.com"
                                         className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 font-mono"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#9CA3AF]">Port</label>
+                                    <label htmlFor="port" className="text-sm font-semibold text-[#9CA3AF]">Port</label>
                                     <input
+                                        id="port"
                                         type="text" name="port" value={formData.port} onChange={handleChange}
                                         placeholder="25565"
                                         className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 font-mono"
@@ -228,11 +232,12 @@ export default function AddServerPage() {
                             <h2 className="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-4">Details & Media</h2>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-[#9CA3AF] flex justify-between">
+                                <label htmlFor="description" className="text-sm font-semibold text-[#9CA3AF] flex justify-between">
                                     <span>Description <span className="text-red-400">*</span></span>
                                     <span className="text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">Markdown Supported</span>
                                 </label>
                                 <textarea
+                                    id="description"
                                     name="description" rows={6} value={formData.description} onChange={handleChange}
                                     placeholder="# Welcome to our server!"
                                     className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 resize-y font-mono text-sm"
@@ -240,8 +245,9 @@ export default function AddServerPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-[#9CA3AF]">Tags (Comma separated) <span className="text-red-400">*</span></label>
+                                <label htmlFor="tags" className="text-sm font-semibold text-[#9CA3AF]">Tags (Comma separated) <span className="text-red-400">*</span></label>
                                 <input
+                                    id="tags"
                                     type="text" name="tags" value={formData.tags} onChange={handleChange}
                                     placeholder="Survival, Economy, PvP"
                                     className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
@@ -251,9 +257,10 @@ export default function AddServerPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Banner Upload */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#9CA3AF]">Banner Image (16:9)</label>
+                                    <label htmlFor="bannerImage" className="text-sm font-semibold text-[#9CA3AF]">Banner Image (16:9)</label>
                                     
                                     <input 
+                                        id="bannerImage"
                                         type="file" 
                                         accept="image/*" 
                                         className="hidden" 
@@ -292,9 +299,10 @@ export default function AddServerPage() {
 
                                 {/* Logo Upload */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#9CA3AF]">Logo Image (1:1)</label>
+                                    <label htmlFor="logoImage" className="text-sm font-semibold text-[#9CA3AF]">Logo Image (1:1)</label>
                                     
                                     <input 
+                                        id="logoImage"
                                         type="file" 
                                         accept="image/*" 
                                         className="hidden" 
@@ -338,8 +346,9 @@ export default function AddServerPage() {
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#5865F2]">Discord Discord URL</label>
+                                    <label htmlFor="discordURL" className="text-sm font-semibold text-[#5865F2]">Discord Discord URL</label>
                                     <input
+                                        id="discordURL"
                                         type="url" name="discordURL" value={formData.discordURL} onChange={handleChange}
                                         placeholder="https://discord.gg/yourcode"
                                         className="w-full bg-[#121212] border border-[#5865F2]/30 focus:border-[#5865F2]/80 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5865F2]/50"
@@ -347,8 +356,9 @@ export default function AddServerPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#9CA3AF]">Website URL</label>
+                                    <label htmlFor="websiteURL" className="text-sm font-semibold text-[#9CA3AF]">Website URL</label>
                                     <input
+                                        id="websiteURL"
                                         type="url" name="websiteURL" value={formData.websiteURL} onChange={handleChange}
                                         placeholder="https://yourserver.com"
                                         className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
