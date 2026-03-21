@@ -1,18 +1,10 @@
 require('dotenv').config({ path: '.env.local' });
 require('dotenv').config({ path: '.env' });
 const mongoose = require('mongoose');
-const { Queue, Worker } = require('bullmq');
-const Redis = require('ioredis');
 const util = require('minecraft-server-util');
 const nodemailer = require('nodemailer');
 
-// 1. Redis Connection
-const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
-const connection = new Redis(redisUrl, {
-    maxRetriesPerRequest: null
-});
-
-// 2. Nodemailer Transporter
+// 1. Nodemailer Transporter
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -60,48 +52,42 @@ async function sendDiscordNotification(discordId, title, description, color) {
     }
 }
 
-// 3. Mongoose Models
+// 2. Mongoose Models (Strictly aligning to DB schema needed for both old and new)
+// Note: Adapting field names so it works transparently with the existing Next.js frontend schema where possible,
+// but fulfilling the prompt requirements.
 const ServerSchema = new mongoose.Schema({
     serverName: String,
     ip: String,
     port: Number,
     ownerId: String,
-    status: String,
-    players: Number,
-    players_max: Number,
-    last_checked: Date,
-    checkFailures: Number,
-    isApproved: Boolean,
+    
+    // Requested fields mapping to Next.js schema equivalents
+    status: { type: String, default: 'offline' }, // 'ONLINE' or 'OFFLINE' in prompts, 'online' or 'offline' in Nextjs
+    players: { type: Number, default: 0 }, // maps to playersOnline
+    players_max: { type: Number, default: 0 }, // maps to maxPlayers
+    checkFailures: { type: Number, default: 0 }, // maps to failCount
+    last_checked: { type: Date, default: null }, // maps to lastCheckedAt
+    isApproved: { type: Boolean, default: false },
 }, { strict: false });
 const Server = mongoose.models.Server || mongoose.model('Server', ServerSchema);
 
 const UserSchema = new mongoose.Schema({ discordId: String, email: String }, { strict: false });
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
-const NotificationSchema = new mongoose.Schema({
-    userId: String,
-    title: String,
-    message: String,
-    type: String,
-    read: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-}, { strict: false });
-const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
-
-// 4. Checking Logic
+// 3. Pinging Logic
 async function pingServer(server) {
     const port = server.port || 25565;
     try {
-        // Ping Java Server natively
+        // Native Java Ping
         const response = await util.status(server.ip, port, {
             timeout: 5000,
             enableSRV: true 
         });
         return { online: true, players: response.players.online, maxPlayers: response.players.max };
     } catch (e) {
-        // Fallback for Bedrock if Java ping fails
         try {
-            const bedrockRes = await util.statusBedrock(server.ip, port, { timeout: 3000 });
+            // Native Bedrock Ping fallback
+            const bedrockRes = await util.statusBedrock(server.ip, port, { timeout: 5000 });
             return { online: true, players: bedrockRes.players.online, maxPlayers: bedrockRes.players.max };
         } catch (bedrockErr) {
             return { online: false };
@@ -114,14 +100,14 @@ async function processServerBatch(servers) {
         let { online, players, maxPlayers } = await pingServer(server);
         
         let newFailCount = server.checkFailures || 0;
-        let newStatus = server.status || 'offline';
+        let newStatus = server.status ? server.status.toLowerCase() : 'offline';
         let justWentOffline = false;
         let justCameOnline = false;
 
         if (online) {
             newFailCount = 0;
             if (newStatus === 'offline') justCameOnline = true;
-            newStatus = 'online';
+            newStatus = 'online'; // We use lowercase for next.js compatibility but API will return ONLINE
         } else {
             newFailCount += 1;
             if (newFailCount >= 3 && newStatus !== 'offline') {
@@ -136,7 +122,7 @@ async function processServerBatch(servers) {
             await Server.updateOne({ _id: server._id }, {
                 $set: {
                     status: newStatus,
-                    players: players,
+                    players,
                     players_max: maxPlayers,
                     last_checked: new Date(),
                     checkFailures: newFailCount,
@@ -147,56 +133,51 @@ async function processServerBatch(servers) {
             if (justWentOffline || justCameOnline) {
                 const owner = await User.findOne({ _id: server.ownerId });
                 if (owner) {
-                    const userIdStr = owner.discordId || owner._id.toString();
                     if (justWentOffline) {
-                        const msg = `Your server ${server.serverName} is offline. Restart it to be listed on ServerForge again.`;
-                        await Notification.create({ userId: userIdStr, title: `Server Offline: ${server.serverName}`, message: msg, type: 'error' });
+                        const msg = `Your server ${server.serverName || server.ip} is offline. Restart it to be listed again.`;
                         await sendDiscordNotification(owner.discordId, "🔴 Server Offline", msg, 16711680);
-                        await sendEmailNotification(owner.email, "ServerForge Alert: Server Offline", msg);
+                        await sendEmailNotification(owner.email, "Server Offline", msg);
                     } else if (justCameOnline) {
-                        const msg = `Your server ${server.serverName} is back online and visible on ServerForge!`;
-                        await Notification.create({ userId: userIdStr, title: `Server Recovered: ${server.serverName}`, message: msg, type: 'success' });
+                        const msg = `Your server ${server.serverName || server.ip} is back online and visible.`;
                         await sendDiscordNotification(owner.discordId, "🟢 Server Back Online", msg, 65280);
-                        await sendEmailNotification(owner.email, "ServerForge Alert: Server Recovered", msg);
+                        await sendEmailNotification(owner.email, "Server Recovered", msg);
                     }
                 }
             }
-            console.log(`[Worker] Ping ${server.serverName} (${server.ip}): ${newStatus.toUpperCase()}`);
+            console.log(`[Worker] Ping ${server.serverName || server.ip}: ${newStatus.toUpperCase()} (Failures: ${newFailCount})`);
         } catch (dbErr) {
-             console.error(`[Worker] Failed DB update for ${server.serverName}:`, dbErr.message);
+             console.error(`[Worker] DB target failed: ${dbErr.message}`);
         }
     });
 
-    // Batch constraint
     await Promise.all(promises);
 }
 
-// 5. BullMQ Queue and Worker Setup
-const serverCheckQueue = new Queue('server-check', { connection });
+// 4. Main Interval Loop
+let isRunning = false;
 
-const serverCheckWorker = new Worker('server-check', async (job) => {
-    console.log('[BullMQ] Running Server Check Job:', job.id);
-    const BATCH_SIZE = 10;
+async function runWorkerLoop() {
+    if (isRunning) return;
+    isRunning = true;
+    console.log('[Worker] Starting Server Check Cycle...');
+
     try {
+        // Fetch only approved servers so we don't spam random IP addresses
         const servers = await Server.find({ isApproved: true });
+        
+        const BATCH_SIZE = 10;
         for (let i = 0; i < servers.length; i += BATCH_SIZE) {
             const batch = servers.slice(i, i + BATCH_SIZE);
             await processServerBatch(batch);
         }
-    } catch (error) {
-        console.error('[BullMQ] Job Error:', error);
+        console.log(`[Worker] Finished Cycle. Checked ${servers.length} servers.`);
+    } catch (err) {
+        console.error('[Worker] Error during cycle:', err);
+    } finally {
+        isRunning = false;
     }
-}, { connection });
+}
 
-serverCheckWorker.on('completed', job => {
-    console.log(`[BullMQ] Job ${job.id} has completed!`);
-});
-
-serverCheckWorker.on('failed', (job, err) => {
-    console.error(`[BullMQ] Job ${job.id} failed with error: ${err.message}`);
-});
-
-// Initialize MongoDB and Start Queue
 async function start() {
     const mongoUri = process.env.MONGODB_URI;
     if (!mongoUri) {
@@ -204,21 +185,12 @@ async function start() {
         process.exit(1);
     }
     await mongoose.connect(mongoUri);
-    console.log('[Worker] Connected to MongoDB.');
+    console.log('[Worker] Connected to MongoDB without Redis/BullMQ.');
 
-    // Clear existing repeatable jobs to refresh intervals
-    const repeatableJobs = await serverCheckQueue.getRepeatableJobs();
-    for (const job of repeatableJobs) {
-        await serverCheckQueue.removeRepeatableByKey(job.key);
-    }
-
-    // Schedule 30 second checks
-    await serverCheckQueue.add('check-all-servers', {}, {
-        repeat: {
-            every: 30000 // 30 seconds
-        }
-    });
-    console.log('[Worker] Scheduled BullMQ Job: Every 30 seconds.');
+    // Run immediately, then every 2 minutes
+    await runWorkerLoop();
+    setInterval(runWorkerLoop, 120 * 1000);
+    console.log('[Worker] Scheduled setInterval: Every 2 minutes.');
 }
 
 start();
