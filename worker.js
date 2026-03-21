@@ -1,15 +1,45 @@
-import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Server from "@/models/Server";
-import User from "@/models/User";
-import Notification from "@/models/Notification";
+require('dotenv').config({ path: '.env.local' });
+require('dotenv').config({ path: '.env' });
+const mongoose = require('mongoose');
+
+// Mongoose Models for Standalone Worker
+const ServerSchema = new mongoose.Schema({
+    serverName: String,
+    ip: String,
+    port: Number,
+    ownerId: String,
+    status: String,
+    players: Number,
+    players_max: Number,
+    last_checked: Date,
+    checkFailures: Number,
+    successfulChecks: Number,
+    uptimeChecks: Number,
+    lastOnline: Date,
+    isApproved: Boolean,
+}, { strict: false });
+const Server = mongoose.models.Server || mongoose.model('Server', ServerSchema);
+
+const UserSchema = new mongoose.Schema({ discordId: String }, { strict: false });
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
+
+const NotificationSchema = new mongoose.Schema({
+    userId: String,
+    title: String,
+    message: String,
+    type: String,
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+}, { strict: false });
+const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
 
 const BATCH_SIZE = 5;
 const DELAY_BETWEEN_BATCHES_MS = 1000;
+const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function sendDiscordNotification(discordId: string, title: string, description: string, color: number) {
+async function sendDiscordNotification(discordId, title, description, color) {
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
     if (!webhookUrl || !discordId) return;
 
@@ -28,11 +58,11 @@ async function sendDiscordNotification(discordId: string, title: string, descrip
             })
         });
     } catch (e) {
-        console.error("Failed to send Discord Webhook", e);
+        console.error("[Worker] Failed to send Discord Webhook", e.message);
     }
 }
 
-async function processBatch(servers: any[]) {
+async function processBatch(servers) {
     const promises = servers.map(async (server) => {
         let isOnline = false;
         let playersOnline = 0;
@@ -42,7 +72,6 @@ async function processBatch(servers: any[]) {
         try {
             const address = server.port !== 25565 && server.port ? `${server.ip}:${server.port}` : server.ip;
             const pingRes = await fetch(`https://api.mcsrvstat.us/3/${address}`, {
-                next: { revalidate: 0 },
                 signal: AbortSignal.timeout(8000)
             });
             
@@ -55,11 +84,10 @@ async function processBatch(servers: any[]) {
                     pingerStatus = (playersMax > 0 && playersOnline >= playersMax) ? 'full' : 'online';
                 }
             }
-        } catch (err: any) {
-            console.error(`Error pinging ${server.serverName}:`, err.message);
+        } catch (err) {
+            console.error(`[Worker] Error pinging ${server.serverName}:`, err.message);
         }
 
-        // Evaluate Status logic
         let newFailures = server.checkFailures || 0;
         let newStatus = server.status || 'offline';
         let newSuccessfulChecks = server.successfulChecks || 0;
@@ -72,21 +100,16 @@ async function processBatch(servers: any[]) {
             newFailures = 0;
             newSuccessfulChecks += 1;
             newLastOnline = new Date();
-            // If it was offline, it came back online
-            if (newStatus === 'offline') {
-                justCameOnline = true;
-            }
-            newStatus = pingerStatus; // online or full
+            if (newStatus === 'offline') justCameOnline = true;
+            newStatus = pingerStatus;
         } else {
             newFailures += 1;
-            // Mark offline if failed 3 times
             if (newFailures >= 3 && newStatus !== 'offline') {
                 newStatus = 'offline';
                 justWentOffline = true;
             }
         }
 
-        // Update DB
         try {
             await Server.updateOne({ _id: server._id }, {
                 $set: {
@@ -101,60 +124,41 @@ async function processBatch(servers: any[]) {
                 }
             });
 
-            // Notifications
             if (justWentOffline || justCameOnline) {
                 const owner = await User.findOne({ _id: server.ownerId });
                 if (owner) {
+                    const userIdStr = owner.discordId || owner._id.toString();
                     if (justWentOffline) {
                         await Notification.create({
-                            userId: owner.discordId || owner._id.toString(),
+                            userId: userIdStr,
                             title: `Server Offline: ${server.serverName}`,
-                            message: `Your server ${server.serverName} failed 3 consecutive health checks and has been hidden from global search.`,
+                            message: `Your server ${server.serverName} failed 3 consecutive health checks and is hidden from search.`,
                             type: 'error'
                         });
-                        await sendDiscordNotification(
-                            owner.discordId, 
-                            "🔴 Server Offline", 
-                            `Your server **${server.serverName}** has failed multiple health checks and is now hidden from global lists. Please restart it.`,
-                            16711680 // red
-                        );
+                        await sendDiscordNotification(owner.discordId, "🔴 Server Offline", `Your server **${server.serverName}** has failed multiple health checks.`, 16711680);
                     } else if (justCameOnline) {
                         await Notification.create({
-                            userId: owner.discordId || owner._id.toString(),
+                            userId: userIdStr,
                             title: `Server Reconnected: ${server.serverName}`,
-                            message: `Your server ${server.serverName} is back online and is visible in global search again!`,
+                            message: `Your server ${server.serverName} is back online and globally visible!`,
                             type: 'success'
                         });
-                        await sendDiscordNotification(
-                            owner.discordId, 
-                            "🟢 Server Back Online", 
-                            `Your server **${server.serverName}** is back online and has been publicly listed again!`,
-                            65280 // green
-                        );
+                        await sendDiscordNotification(owner.discordId, "🟢 Server Back Online", `Your server **${server.serverName}** is back online!`, 65280);
                     }
                 }
             }
-        } catch (dbErr: any) {
-             console.error(`Failed to update MongoDB for ${server.serverName}:`, dbErr.message);
+            console.log(`[Worker] Updated ${server.serverName} -> ${newStatus}`);
+        } catch (dbErr) {
+             console.error(`[Worker] Failed to update MongoDB for ${server.serverName}:`, dbErr.message);
         }
     });
 
     await Promise.allSettled(promises);
 }
 
-export async function GET(req: NextRequest) {
-    // Only allow vercel cron or local requests
-    const authHeader = req.headers.get('authorization');
-    if (
-        process.env.NODE_ENV !== 'development' &&
-        authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+async function runMonitorCycle() {
+    console.log('[Worker] Starting Server Check Cycle at', new Date().toISOString());
     try {
-        await dbConnect();
-        
         const serversOptions = { isApproved: true };
         const cursor = Server.find(serversOptions).cursor();
         let batch = [];
@@ -171,10 +175,33 @@ export async function GET(req: NextRequest) {
         if (batch.length > 0) {
             await processBatch(batch);
         }
-
-        return NextResponse.json({ success: true, message: 'Monitor run finished.' });
-    } catch (error: any) {
-        console.error('Critical Error in cron:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.log('[Worker] Cycle Completed Successfully.');
+    } catch (error) {
+        console.error('[Worker] Critical Error in cycle:', error);
     }
 }
+
+async function startWorker() {
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+        console.error("[Worker] ERROR: MONGODB_URI is not set in environment variables!");
+        process.exit(1);
+    }
+
+    try {
+        await mongoose.connect(mongoUri);
+        console.log('[Worker] Connected to MongoDB Data Cluster.');
+        
+        // Run immediately on boot
+        runMonitorCycle();
+
+        // Schedule recurrent cycles
+        setInterval(runMonitorCycle, CHECK_INTERVAL_MS);
+        console.log(`[Worker] Scheduled to run every ${CHECK_INTERVAL_MS / 1000 / 60} minutes.`);
+    } catch (err) {
+        console.error('[Worker] Failed to connect to DB', err);
+        process.exit(1);
+    }
+}
+
+startWorker();
