@@ -20,28 +20,8 @@ interface ServerProps {
 export function DashboardServerList() {
     const [servers, setServers] = useState<ServerProps[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [recheckingId, setRecheckingId] = useState<string | null>(null);
     const { toast } = useToast();
-
-    const handleRecheck = async (serverId: string) => {
-        setRecheckingId(serverId);
-        try {
-            const res = await fetch(`/api/servers/${serverId}/recheck`, {
-                method: 'POST'
-            });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                toast('success', "Status Updated", data.message);
-                setServers(prev => prev.map(s => s._id === serverId ? { ...s, status: data.status, players: data.players } : s));
-            } else {
-                toast('error', "Recheck Failed", data.error || "Could not recheck server.");
-            }
-        } catch (e: any) {
-            toast('error', "Recheck Error", "An error occurred during rechecking.");
-        } finally {
-            setRecheckingId(null);
-        }
-    };
+    // Removed Check function as per user request to change the UI to "View" and "Edit"
 
     useEffect(() => {
         const fetchMyServers = async () => {
@@ -178,16 +158,14 @@ export function DashboardServerList() {
                         </div>
 
                         <div className="flex gap-2 relative z-10">
-                            <button 
-                                onClick={() => handleRecheck(server._id)}
-                                disabled={recheckingId === server._id}
-                                className={`flex-1 overflow-hidden py-2 ${recheckingId === server._id ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 hover:bg-white/10 text-white'} text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center justify-center gap-2`}
-                            >
-                                <Globe className={`w-3 h-3 ${recheckingId === server._id ? 'animate-spin' : ''}`} /> {recheckingId === server._id ? '...' : 'Check'}
-                            </button>
                             <Link href={`/server/${server._id}`} className="flex-1">
-                                <button className="w-full py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center justify-center gap-2">
-                                    <Eye className="w-3 h-3" /> View
+                                <button className="w-full py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center justify-center gap-2 group/btn">
+                                    <Eye className="w-3 h-3 group-hover/btn:text-blue-400 transition-colors" /> View
+                                </button>
+                            </Link>
+                            <Link href={`/dashboard/servers/${server._id}/edit`} className="flex-1">
+                                <button className="w-full py-2 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center justify-center gap-2 group/btn">
+                                    <Edit3 className="w-3 h-3 group-hover/btn:text-blue-400 transition-colors" /> Edit
                                 </button>
                             </Link>
                             <button aria-label="Bump Server" title="Bump Server" className="px-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg transition-all flex items-center justify-center group/btn shadow-[0_0_10px_rgba(59,130,246,0.05)]">
