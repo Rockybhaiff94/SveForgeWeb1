@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
         const tagsParam = url.searchParams.get("tags");
 
         // Build query
-        const query: any = { isApproved: true };
+        const query: any = { isApproved: true, status: { $ne: 'offline' } };
 
         if (gameType && gameType !== "all") {
             query.gameType = gameType;

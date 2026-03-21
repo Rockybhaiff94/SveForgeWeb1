@@ -77,6 +77,22 @@ const ServerSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    checkFailures: {
+        type: Number,
+        default: 0,
+    },
+    lastOnline: {
+        type: Date,
+        default: Date.now,
+    },
+    uptimeChecks: {
+        type: Number,
+        default: 0,
+    },
+    successfulChecks: {
+        type: Number,
+        default: 0,
+    },
 });
 
 export default mongoose.models.Server || mongoose.model('Server', ServerSchema);
