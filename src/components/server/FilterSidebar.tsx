@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Filter, ChevronDown, Check, SlidersHorizontal, Search, X } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface FilterSidebarProps {
     onFilterChange: (filters: any) => void;

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, Menu, LogIn, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export function LandingNavBar() {
     const router = useRouter();
@@ -47,7 +47,7 @@ export function LandingNavBar() {
                     </Button>
                 </Link>
                 <Link href="/login">
-                    <Button size="default" className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all gap-2 font-semibold">
+                    <Button size="md" className="bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all gap-2 font-semibold">
                         <UserPlus className="w-4 h-4" /> Sign Up
                     </Button>
                 </Link>

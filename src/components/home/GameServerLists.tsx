@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ServerCard } from "@/components/ui/ServerCard";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { ChevronRight, Gamepad2 } from "lucide-react";
 
 // Helper generator for mock data to avoid huge arrays

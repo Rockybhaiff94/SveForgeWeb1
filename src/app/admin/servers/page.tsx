@@ -27,7 +27,7 @@ export default function ServersPage() {
 
   const handleStatusChange = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'ONLINE' ? 'OFFLINE' : 'ONLINE';
-    if(confirm(\`Are you sure you want to \${newStatus === 'ONLINE' ? 'start' : 'stop'} this server?\`)) {
+    if(confirm(`Are you sure you want to ${newStatus === 'ONLINE' ? 'start' : 'stop'} this server?`)) {
       await fetch('/api/servers', { 
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -39,7 +39,7 @@ export default function ServersPage() {
 
   const handleDelete = async (id: string) => {
     if(confirm('Are you sure you want to delete this server?')) {
-      await fetch(\`/api/servers?id=\${id}\`, { method: 'DELETE' });
+      await fetch(`/api/servers?id=${id}`, { method: 'DELETE' });
       fetchServers();
     }
   };

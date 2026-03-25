@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Lock, ArrowRight, Home } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export default function LoginRequiredPage() {
     return (

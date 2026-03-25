@@ -27,7 +27,7 @@ export default function UsersPage() {
 
   const handleDelete = async (id: string) => {
     if(confirm('Are you sure you want to delete this user?')) {
-      await fetch(\`/api/users?id=\${id}\`, { method: 'DELETE' });
+      await fetch(`/api/users?id=${id}`, { method: 'DELETE' });
       fetchUsers();
     }
   };

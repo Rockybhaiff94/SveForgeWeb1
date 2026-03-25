@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { LandingNavBar } from "@/components/home/LandingNavBar";
 import { ServerCard } from "@/components/ui/ServerCard";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Search, TrendingUp, BarChart, Shield, UserPlus, Gamepad2, Users, ArrowRight, Activity, Globe, ChevronRight, Server } from "lucide-react";
 
 

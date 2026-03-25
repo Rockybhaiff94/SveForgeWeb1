@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { FilterSidebar } from "@/components/server/FilterSidebar";
 import { ServerCard } from "@/components/ui/ServerCard";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Loader2, Star } from "lucide-react";
 
 export default function TopClient() {

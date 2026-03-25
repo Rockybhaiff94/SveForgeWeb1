@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { Server, Image as ImageIcon, Link as LinkIcon, CheckCircle2, ChevronRight, ChevronLeft, UploadCloud, Loader2, X } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/ToastContext";
 import { useRouter } from "next/navigation";
 

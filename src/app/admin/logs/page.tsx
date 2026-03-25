@@ -71,7 +71,7 @@ export default function LogsPage() {
                   </TableCell>
                   <TableCell className="font-medium text-gray-300">{log.action}</TableCell>
                   <TableCell className="text-gray-400 text-sm">
-                    {log.userId?.name || 'System'} {log.serverId ? \`• \${log.serverId.name}\` : ''}
+                    {log.userId?.name || 'System'} {log.serverId ? `• ${log.serverId.name}` : ''}
                   </TableCell>
                   <TableCell className="text-gray-500 text-sm">{log.details || '-'}</TableCell>
                 </TableRow>

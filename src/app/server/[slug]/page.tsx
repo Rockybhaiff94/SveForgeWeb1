@@ -2,8 +2,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Server, Users, Star, MessageSquare, AlertTriangle, Shield, Globe, Disc, Copy, ChevronUp } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 // Mock data (server fetching would normally happen here)
 const mockServer = {

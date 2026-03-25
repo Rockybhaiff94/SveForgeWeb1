@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     for (const keyword of BANNED_KEYWORDS) {
       if (lowerContent.includes(keyword)) {
         flagged = true;
-        reasons.push(\`Contains banned keyword: \${keyword}\`);
+        reasons.push(`Contains banned keyword: ${keyword}`);
       }
     }
     

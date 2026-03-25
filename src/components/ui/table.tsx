@@ -15,13 +15,13 @@ export function TableHeader({ children }: { children: React.ReactNode }) {
 }
 
 export function TableRow({ children, className = '' }: { children: React.ReactNode, className?: string }) {
-  return <tr className={\`border-b border-[#2b2d31] last:border-0 hover:bg-[#2b2d31]/50 \${className}\`}>{children}</tr>;
+  return <tr className={`border-b border-[#2b2d31] last:border-0 hover:bg-[#2b2d31]/50 ${className}`}>{children}</tr>;
 }
 
 export function TableHead({ children, className = '' }: { children: React.ReactNode, className?: string }) {
-  return <th className={\`px-6 py-3 font-semibold \${className}\`}>{children}</th>;
+  return <th className={`px-6 py-3 font-semibold ${className}`}>{children}</th>;
 }
 
-export function TableCell({ children, className = '' }: { children: React.ReactNode, className?: string }) {
-  return <td className={\`px-6 py-4 \${className}\`}>{children}</td>;
+export function TableCell({ children, className = '', colSpan }: { children: React.ReactNode, className?: string, colSpan?: number }) {
+  return <td className={`px-6 py-4 ${className}`} colSpan={colSpan}>{children}</td>;
 }

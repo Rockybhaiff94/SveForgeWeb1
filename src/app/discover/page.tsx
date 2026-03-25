@@ -1,6 +1,6 @@
 import React from "react";
 import { ServerCard } from "@/components/ui/ServerCard";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Filter, SortDesc, TrendingUp } from "lucide-react";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
 
