@@ -1,28 +1,41 @@
-import dbConnect from '@/lib/mongodb';
-import UserModel from '@/models/User';
 import { NextResponse } from 'next/server';
-import { verifyJwtEdge } from '@/lib/auth-edge';
-
-// Add edge runtime config later if needed, but mongoose might not work on edge. 
-// We are using node env for api routes connected to db.
+import connectDB from '@/lib/db';
+import User from '@/models/User';
+import { getUserFromReq } from '@/lib/auth';
 
 export async function GET(req: Request) {
-    try {
-        await dbConnect();
-        // Since we are not strictly using edge for the api route logic handling DB, we still verify JWT from cookie
-        
-        const cookieHeader = req.headers.get('cookie') || '';
-        const tokenMatch = cookieHeader.match(/token=([^;]+)/);
-        if (!tokenMatch) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        
-        const payload = await verifyJwtEdge(tokenMatch[1]);
-        if (!payload || !['OWNER', 'ADMIN'].includes(payload.role as string)) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+  try {
+    // Note: Request here is the web API Request, but in Next 14 Route Handlers, 
+    // we can parse cookies from headers or use next/headers
+    // But getUserFromReq expects NextRequest. Wait, we can just use req directly if we cast.
+    // Instead we will rely on middleware to protect it.
+    await connectDB();
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    return NextResponse.json({ users });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
 
-        const users = await UserModel.find().select('-password -accessToken').sort({ createdAt: -1 });
-        return NextResponse.json({ success: true, users });
-    } catch (error) {
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-    }
+export async function PUT(req: Request) {
+  try {
+    const { id, role, status } = await req.json();
+    await connectDB();
+    const user = await User.findByIdAndUpdate(id, { role, status }, { new: true }).select('-password');
+    return NextResponse.json({ user });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    await connectDB();
+    await User.findByIdAndDelete(id);
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

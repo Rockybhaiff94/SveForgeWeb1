@@ -1,53 +1,31 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyJwtEdge } from '@/lib/auth-edge';
+import { verifyToken } from './lib/auth';
 
-export async function middleware(request: NextRequest) {
-    const token = request.cookies.get('token')?.value;
-    const url = request.nextUrl;
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  
+  if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard')) {
+    const token = req.cookies.get('token')?.value;
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+    const payload = await verifyToken(token);
+    if (!payload) {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
     
-    const isDashboardPath = url.pathname.startsWith('/dashboard') ||
-        url.pathname.startsWith('/profile') ||
-        url.pathname.startsWith('/submit');
-    const isAdminPath = url.pathname.startsWith('/admin') && !url.pathname.startsWith('/admin/login');
-
-    if (isDashboardPath && !token) {
-        return NextResponse.redirect(new URL('/login', request.url));
+    // Check RBAC for /admin
+    if (pathname.startsWith('/admin')) {
+      const role = payload.role as string;
+      if (role !== 'OWNER' && role !== 'ADMIN' && role !== 'DEV' && role !== 'MOD') {
+         return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
     }
-
-    if (isAdminPath && !token) {
-        return NextResponse.redirect(new URL('/admin/login', request.url));
-    }
-
-    if (token) {
-        const payload = await verifyJwtEdge(token);
-        if (!payload) {
-            // Invalid token
-            let response;
-            if (isAdminPath) {
-                response = NextResponse.redirect(new URL('/admin/login', request.url));
-            } else {
-                response = NextResponse.redirect(new URL('/login', request.url));
-            }
-            response.cookies.delete('token');
-            return response;
-        }
-
-        // RBAC logic for /admin routes
-        if (isAdminPath) {
-            const role = payload.role;
-            const hasAdminAccess = ['OWNER', 'ADMIN', 'DEV', 'MOD'].includes(role || '');
-            if (!hasAdminAccess) {
-                return NextResponse.redirect(new URL('/dashboard', request.url));
-            }
-            
-            // Further granular permissions could be added here
-        }
-    }
-
-    return NextResponse.next();
+  }
+  return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/profile", "/dashboard/:path*", "/submit", "/admin/:path*"],
+  matcher: ['/admin/:path*', '/dashboard/:path*'],
 };

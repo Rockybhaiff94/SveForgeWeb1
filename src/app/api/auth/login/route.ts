@@ -1,45 +1,36 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
 import bcrypt from 'bcrypt';
-import { signJwtEdge } from '@/lib/auth-edge';
+import connectDB from '@/lib/db';
+import User from '@/models/User';
+import { signToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
-    try {
-        await dbConnect();
-        const { email, password } = await req.json();
-
-        if (!email || !password) {
-            return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
-        }
-
-        const user = await User.findOne({ email });
-        if (!user || !user.password) {
-            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-        }
-
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid) {
-            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-        }
-
-        // Generate JWT
-        const token = await signJwtEdge({ userId: user._id.toString(), role: user.role }, '7d');
-
-        const response = NextResponse.json({ success: true, user: { id: user._id, email: user.email, role: user.role } });
-        response.cookies.set({
-            name: 'token',
-            value: token,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60, // 7 days
-            path: '/',
-        });
-
-        return response;
-    } catch (error) {
-        console.error('Login Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  try {
+    await connectDB();
+    const { email, password } = await req.json();
+    
+    const user = await User.findOne({ email });
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+    
+    const token = await signToken({ id: user._id, role: user.role, email: user.email });
+    
+    const res = NextResponse.json({ success: true, user: { id: user._id, email: user.email, role: user.role } });
+    res.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/'
+    });
+    
+    return res;
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
