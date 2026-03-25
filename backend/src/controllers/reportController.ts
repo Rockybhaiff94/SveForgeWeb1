@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { Report } from '../models/Report';
 import { AuditService } from '../services/AuditService';
+import { IUser } from '../models/User';
+
+interface AuthenticatedRequest extends Request {
+  user: IUser;
+}
 
 export const getReports = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -18,7 +23,7 @@ export const getReports = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const updateReportStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateReportStatus = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { status, resolutionNotes } = req.body;
     const report = await Report.findById(req.params.id);

@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { Server } from '../models/Server';
-import { User } from '../models/User';
+import { User, IUser } from '../models/User';
 import { Types } from 'mongoose';
 
-export const getDashboardStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+interface AuthenticatedRequest extends Request {
+  user: IUser;
+}
+
+export const getDashboardStats = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ success: false, error: 'Unauthorized' });

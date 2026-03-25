@@ -2,9 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { User } from '../models/User';
+import { User, IUser } from '../models/User';
 import { env } from '../config/env';
 import { AuditService } from '../services/AuditService';
+
+interface AuthenticatedRequest extends Request {
+  user: IUser;
+}
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -65,7 +69,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   }
 };
 
-export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMe = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ success: false, error: 'Not authenticated' });
@@ -77,7 +81,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
   }
 };
 
-export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const logout = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (req.user) {
       await AuditService.logAction({
