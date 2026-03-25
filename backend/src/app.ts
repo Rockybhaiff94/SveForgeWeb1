@@ -17,7 +17,11 @@ const app = express();
 
 // Security & Parsing Middlewares
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+const allowedOrigins = env.CORS_ORIGIN.split(',');
+app.use(cors({ 
+  origin: allowedOrigins.length > 1 ? allowedOrigins : allowedOrigins[0], 
+  credentials: true 
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
