@@ -72,6 +72,8 @@ export function FilterSidebar({ onFilterChange, className = "" }: FilterSidebarP
                         <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Sort By</label>
                         <select
                             value={filters.sortBy}
+                            title="Sort by"
+                            aria-label="Sort by"
                             onChange={(e) => handleFilterChange("sortBy", e.target.value)}
                             className="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 appearance-none"
                         >
@@ -89,6 +91,8 @@ export function FilterSidebar({ onFilterChange, className = "" }: FilterSidebarP
                         <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Game Type</label>
                         <select
                             value={filters.gameType}
+                            title="Game Type"
+                            aria-label="Game Type"
                             onChange={(e) => handleFilterChange("gameType", e.target.value)}
                             className="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 appearance-none"
                         >
@@ -104,6 +108,8 @@ export function FilterSidebar({ onFilterChange, className = "" }: FilterSidebarP
                         <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Server Region</label>
                         <select
                             value={filters.region}
+                            title="Server Region"
+                            aria-label="Server Region"
                             onChange={(e) => handleFilterChange("region", e.target.value)}
                             className="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 appearance-none"
                         >
@@ -171,6 +177,8 @@ export function FilterSidebar({ onFilterChange, className = "" }: FilterSidebarP
                         <input
                             type="range"
                             min="0" max="5" step="0.5"
+                            title="Minimum Rating"
+                            aria-label="Minimum Rating"
                             value={filters.minRating}
                             onChange={(e) => handleFilterChange("minRating", parseFloat(e.target.value))}
                             className="w-full accent-yellow-400 bg-gray-800 rounded-full appearance-none h-1.5 cursor-pointer"

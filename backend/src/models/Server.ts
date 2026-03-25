@@ -7,6 +7,7 @@ export interface IServer extends Document {
   ram: number;
   cpu: number;
   moderators: Schema.Types.ObjectId[];
+  votes: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,7 +18,8 @@ const ServerSchema = new Schema<IServer>({
   status: { type: String, enum: ['ONLINE', 'OFFLINE', 'STARTING', 'STOPPING', 'MAINTENANCE'], default: 'OFFLINE' },
   ram: { type: Number, default: 1024 },
   cpu: { type: Number, default: 1 },
-  moderators: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  moderators: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  votes: { type: Number, default: 0 }
 }, { timestamps: true });
 
 export const Server = model<IServer>('Server', ServerSchema);

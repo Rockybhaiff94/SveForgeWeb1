@@ -114,7 +114,11 @@ export default function ServerDetailPage({ params }: { params: { slug: string } 
                             {server.description.split('\n').map((line, i) => {
                                 if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-bold mt-4 mb-2">{line.replace('# ', '')}</h1>;
                                 if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-bold mt-4 mb-2 text-gray-200">{line.replace('## ', '')}</h2>;
-                                if (line.startsWith('- ')) return <li key={i} className="ml-4 text-gray-300">{line.replace('- ', '')}</li>;
+                                if (line.startsWith('- ')) return (
+                                    <ul key={`list-${i}`} className="my-2">
+                                        <li className="ml-4 text-gray-300 list-disc">{line.replace('- ', '')}</li>
+                                    </ul>
+                                );
                                 return <p key={i} className="text-gray-400 my-2">{line}</p>;
                             })}
                         </div>

@@ -184,7 +184,7 @@ export default function EditServerPage() {
                 <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/10 -z-10 -translate-y-1/2 rounded-full" />
                 <div
                     className="absolute left-0 top-1/2 h-1 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] -z-10 -translate-y-1/2 rounded-full transition-all duration-500"
-                    style={{ width: `${((step - 1) / 2) * 100}%` }}
+                    style={{ '--progress-width': `${((step - 1) / 2) * 100}%`, width: 'var(--progress-width)' } as React.CSSProperties}
                 />
 
                 {STEPS.map((s) => (

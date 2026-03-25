@@ -13,7 +13,7 @@ export default function ModerationPage() {
 
   const fetchReports = async () => {
     try {
-      const res = await fetch('/api/moderation/queue');
+      const res = await fetch('/api/moderation'); // Points to backend /reports
       const data = await res.json();
       if(data.reports) setReports(data.reports);
     } finally {
@@ -25,22 +25,27 @@ export default function ModerationPage() {
     fetchReports();
   }, []);
 
-  const handleAction = async (reportId: string, action: string) => {
+  const handleAction = async (reportId: string, actionName: string) => {
     let resolutionNotes = '';
+    let status = '';
+
+    if (actionName === 'CLAIM') status = 'INVESTIGATING';
+    else if (actionName === 'RESOLVE') status = 'RESOLVED';
+    else if (actionName === 'DISMISS') status = 'DISMISSED';
     
-    if (action === 'RESOLVE' || action === 'DISMISS') {
-      const notes = prompt(`Enter resolution notes to ${action.toLowerCase()} this report:`);
-      if (notes === null) return; // cancelled
+    if (status === 'RESOLVED' || status === 'DISMISSED') {
+      const notes = prompt(`Enter resolution notes to ${status.toLowerCase()} this report:`);
+      if (notes === null) return; 
       resolutionNotes = notes;
-    } else if (action === 'CLAIM') {
+    } else if (status === 'INVESTIGATING') {
       if (!confirm('Are you sure you want to claim this report?')) return;
     }
 
     try {
-      const res = await fetch('/api/moderation/queue', {
-        method: 'POST',
+      const res = await fetch(`/api/moderation/${reportId}/status`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, reportId, resolutionNotes })
+        body: JSON.stringify({ status, resolutionNotes })
       });
       if (res.ok) fetchReports();
       else alert('Action failed');

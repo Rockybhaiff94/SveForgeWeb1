@@ -21,7 +21,7 @@ export async function verifyToken(token: string) {
 }
 
 export async function getUserFromReq(req: NextRequest) {
-  const token = req.cookies.get('token')?.value;
+  const token = req.cookies.get('sf_token')?.value;
   if (!token) return null;
   return await verifyToken(token);
 }

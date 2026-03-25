@@ -5,45 +5,48 @@ import User from '@/models/User';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+const API_BASE_URL = process.env.SERVERFORGE_API || 'http://localhost:8080';
+
 /**
- * Verifies the JWT from the cookies and returns the user object.
+ * Verifies the JWT from the cookies and returns the user object from the backend API.
  */
 export async function getSessionUser() {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('sf_token')?.value;
 
     if (!token) return null;
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET!) as { userId: string, discordId: string };
+        // Since we are in an enterprise decoupled architecture, 
+        // the frontend should query the backend API for session data.
+        const res = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            next: { revalidate: 60 } // Cache for 60s
+        });
 
-        await dbConnect();
-        const user = await User.findById(decoded.userId).lean();
+        if (!res.ok) return null;
 
-        if (!user) return null;
-
-        // Convert _id to string for Next.js client component compatibility
-        return {
-            ...user,
-            _id: user._id.toString(),
-            createdAt: user.createdAt?.toISOString(),
-        };
+        const data = await res.json();
+        return data.user || null;
     } catch (error) {
+        console.error('getSessionUser Error:', error);
         return null;
     }
 }
 
 /**
- * Simplified verification for API routes or server components that just need the ID.
+ * Simplified verification for API routes or server components.
  */
 export async function verifyToken() {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get('sf_token')?.value;
 
     if (!token) return null;
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET!) as { userId: string, discordId: string };
+        const decoded = jwt.decode(token) as { id: string, role: string };
         return decoded;
     } catch (error) {
         return null;

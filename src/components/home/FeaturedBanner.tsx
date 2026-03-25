@@ -139,12 +139,16 @@ export function FeaturedBanner() {
                 <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 flex items-center gap-3 z-30">
                     <button
                         onClick={prevSlide}
+                        title="Previous Slide"
+                        aria-label="Previous Slide"
                         className="w-12 h-12 rounded-full bg-black/50 border border-white/10 hover:bg-[#3B82F6] hover:border-[#3B82F6] text-white flex items-center justify-center transition-all backdrop-blur-md"
                     >
                         <ChevronLeft className="w-6 h-6" />
                     </button>
                     <button
                         onClick={nextSlide}
+                        title="Next Slide"
+                        aria-label="Next Slide"
                         className="w-12 h-12 rounded-full bg-black/50 border border-white/10 hover:bg-[#3B82F6] hover:border-[#3B82F6] text-white flex items-center justify-center transition-all backdrop-blur-md"
                     >
                         <ChevronRight className="w-6 h-6" />

@@ -16,7 +16,7 @@ const routes = [
   { href: '/admin/dev-tools', label: 'Dev Tools', icon: Terminal },
 ];
 
-export function Sidebar({ isMobile = false }) {
+export function Sidebar({ user, isMobile = false }: { user?: any, isMobile?: boolean }) {
   const pathname = usePathname();
 
   return (

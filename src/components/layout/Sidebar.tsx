@@ -74,6 +74,24 @@ export function Sidebar({ className, user }: { className?: string, user: any }) 
                         })}
                     </nav>
                 </div>
+
+                {user && ['OWNER', 'ADMIN', 'DEV', 'MOD'].includes(user.role) && (
+                    <div>
+                        <p className="px-2 text-xs font-semibold text-red-500/60 uppercase tracking-wider mb-3">Administration</p>
+                        <nav className="space-y-1">
+                            <Link
+                                href="/admin"
+                                className={cn(
+                                    "flex items-center gap-3 px-3 py-2 text-sm transition-all group border border-transparent text-white/65 hover:bg-red-500/10 hover:text-red-400 rounded-xl",
+                                    isActive('/admin') && "bg-red-500/15 border-red-500/30 text-red-400"
+                                )}
+                            >
+                                <LayoutDashboard className="w-5 h-5" />
+                                Admin Panel
+                            </Link>
+                        </nav>
+                    </div>
+                )}
             </div>
 
             <div className="p-4 border-t border-white/10">

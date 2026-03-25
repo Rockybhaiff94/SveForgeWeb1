@@ -41,7 +41,11 @@ export function GameServerLists() {
                 const servers = generateMockServersForGame(game.title.split(' ')[0], game.slug, 4);
 
                 return (
-                    <div key={game.slug} className="animate-in fade-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
+                    <div 
+                        key={game.slug} 
+                        className="animate-in fade-in slide-in-from-bottom-8 duration-700" 
+                        style={{ '--delay': `${index * 150}ms` } as React.CSSProperties}
+                    >
                         <div className="flex justify-between items-end mb-6">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-white/5 border border-white/10">
