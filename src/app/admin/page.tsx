@@ -8,9 +8,15 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({ totalUsers: 0, totalServers: 0, systemHealth: { cpu: 0, ram: 0 } });
   
   useEffect(() => {
-    fetch('/api/stats').then(r => r.json()).then(data => {
-      if(!data.error) setStats(data);
-    });
+    const fetchStats = () => {
+      fetch('/api/stats').then(r => r.json()).then(data => {
+        if(!data.error) setStats(data);
+      }).catch(() => {});
+    };
+    
+    fetchStats();
+    const interval = setInterval(fetchStats, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

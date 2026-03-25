@@ -26,7 +26,7 @@ export default function LogsPage() {
 
   useEffect(() => {
     fetchLogs();
-    const interval = setInterval(fetchLogs, 10000);
+    const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
   }, []);
 

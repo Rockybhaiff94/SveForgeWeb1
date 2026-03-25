@@ -1,62 +1,49 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
-import connectDB from '@/lib/db';
-import User from '@/models/User';
-import { signToken } from '@/lib/auth';
-import { createLog, getClientIp } from '@/lib/logger';
+import { cookies } from 'next/headers';
+
+const API_BASE_URL = process.env.SERVERFORGE_API || 'http://localhost:8080';
 
 export async function POST(req: Request) {
   try {
-    await connectDB();
-    const { email, password } = await req.json();
-    
-    const user = await User.findOne({ email });
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-    }
-    
-    if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
-      return NextResponse.json({ error: `Account is ${user.status.toLowerCase()}` }, { status: 403 });
-    }
-    
-    // IP and User Agent tracking
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'Unknown';
-    const userAgent = req.headers.get('user-agent') || 'Unknown';
-    
-    // Update user login history
-    if (!user.ips.includes(ip)) user.ips.push(ip);
-    user.loginHistory.push({ ip, userAgent, date: new Date() });
-    await user.save();
+    const body = await req.json();
 
-    const token = await signToken({ 
-      id: user._id, 
-      role: user.role, 
-      email: user.email,
-      tokenVersion: user.tokenVersion || 0,
-      status: user.status
+    // 1. Forward credentials to real backend
+    const backendRes = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: body.email,
+        password: body.password,
+        ip: req.headers.get('x-forwarded-for') || '127.0.0.1' // Include IP for backend logging
+      })
     });
-    
-    const res = NextResponse.json({ success: true, user: { id: user._id, email: user.email, role: user.role, status: user.status } });
 
-    await createLog({
-      action: 'USER_LOGIN',
-      type: 'INFO',
-      userId: user._id,
-      actorRole: user.role,
-      targetId: user._id,
-      targetType: 'User',
-      ipAddress: ip,
-      details: `User logged in from ${ip} via ${userAgent.substring(0, 30)}...`
-    });
-    res.cookies.set('token', token, {
+    const data = await backendRes.json();
+
+    if (!backendRes.ok) {
+      return NextResponse.json({ error: data.error || 'Authentication failed' }, { status: backendRes.status });
+    }
+
+    // 2. The backend returned a JWT. We store it in an HTTP-only cookie.
+    const token = data.token;
+    if (!token) {
+      return NextResponse.json({ error: 'Backend did not return a token' }, { status: 500 });
+    }
+
+    const cookieStore = await cookies();
+    cookieStore.set('sf_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/'
     });
-    
-    return res;
+
+    // 3. Return user data to frontend (without the raw token)
+    return NextResponse.json({ success: true, user: data.user });
+
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('Login Proxy Error:', err);
+    return NextResponse.json({ error: 'Internal Server Error (Gateway)' }, { status: 500 });
   }
 }

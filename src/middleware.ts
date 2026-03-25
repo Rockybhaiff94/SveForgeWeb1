@@ -6,7 +6,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
   if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard')) {
-    const token = req.cookies.get('token')?.value;
+    const token = req.cookies.get('sf_token')?.value || req.cookies.get('token')?.value;
     if (!token) {
       return NextResponse.redirect(new URL('/login', req.url));
     }

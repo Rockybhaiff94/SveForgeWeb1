@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+
+export async function POST() {
+  const cookieStore = await cookies();
+  cookieStore.delete('sf_token');
+  
+  // Optionally ping the backend /auth/logout if the backend tracks sessions
+  const API_BASE_URL = process.env.SERVERFORGE_API || 'http://localhost:8080';
+  fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST' }).catch(() => {});
+
+  return NextResponse.json({ success: true });
+}
 
 export async function GET() {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://serverforge.xyz';
-    const response = NextResponse.redirect(new URL('/', baseUrl));
-
-    // Clear the session token cookie
-    response.cookies.set('token', '', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 0,
-    });
-
-    return response;
+  const cookieStore = await cookies();
+  cookieStore.delete('sf_token');
+  return NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'));
 }
