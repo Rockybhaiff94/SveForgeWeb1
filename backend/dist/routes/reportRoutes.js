@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const reportController_1 = require("../controllers/reportController");
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const rbacMiddleware_1 = require("../middleware/rbacMiddleware");
+const router = (0, express_1.Router)();
+router.use(authMiddleware_1.requireAuth);
+router.get('/', (0, rbacMiddleware_1.requireRole)('MOD'), reportController_1.getReports);
+router.patch('/:id/status', (0, rbacMiddleware_1.requireRole)('MOD'), reportController_1.updateReportStatus);
+exports.default = router;
