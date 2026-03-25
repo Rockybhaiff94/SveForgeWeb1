@@ -12,9 +12,10 @@ export function AppLayoutWrapper({ children, user }: { children: React.ReactNode
 
     // The landing page should be completely full screen.
     const isLandingPage = pathname === "/";
+    const isAdminPanel = pathname?.startsWith("/admin");
     const isDashboard = pathname.startsWith("/dashboard");
 
-    if (isLandingPage) {
+    if (isLandingPage || isAdminPanel) {
         return <main className="flex-1 w-full min-h-screen relative overflow-x-hidden">{children}</main>;
     }
 
