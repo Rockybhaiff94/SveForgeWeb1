@@ -11,6 +11,11 @@ const ServerSchema = new mongoose.Schema({
   },
   ram: { type: Number, default: 1024 }, // MB
   cpu: { type: Number, default: 1 }, // Cores
+  region: { type: String, default: 'US-East' },
+  resourceUsage: {
+    cpuPercent: { type: Number, default: 0 },
+    ramPercent: { type: Number, default: 0 }
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

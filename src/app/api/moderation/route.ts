@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
-import Log from '@/models/Log';
+import { createLog } from '@/lib/logger';
 
 const BANNED_KEYWORDS = ['spam', 'abuse', 'hack', 'exploit'];
 
@@ -22,14 +22,14 @@ export async function POST(req: Request) {
     
     // Auto-flag logging
     if (flagged) {
-      await connectDB();
-      const log = new Log({
+      await createLog({
         action: 'AI_MODERATION_FLAG',
         type: 'WARNING',
         userId,
+        targetId: userId,
+        targetType: 'User',
         details: reasons.join(', ')
       });
-      await log.save();
     }
     
     return NextResponse.json({ flagged, reasons });

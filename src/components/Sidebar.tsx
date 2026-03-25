@@ -11,6 +11,7 @@ const routes = [
   { href: '/admin/servers', label: 'Servers', icon: Server },
   { href: '/admin/logs', label: 'Logs', icon: FileText },
   { href: '/admin/permissions', label: 'Permissions', icon: ShieldAlert },
+  { href: '/admin/moderation', label: 'Queue', icon: ShieldAlert },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
   { href: '/admin/dev-tools', label: 'Dev Tools', icon: Terminal },
 ];

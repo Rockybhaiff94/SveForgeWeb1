@@ -11,9 +11,16 @@ const UserSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['ACTIVE', 'SUSPENDED', 'BANNED'],
+    enum: ['ACTIVE', 'SUSPENDED', 'BANNED', 'SHADOW_BANNED'],
     default: 'ACTIVE'
   },
+  ips: [{ type: String }],
+  loginHistory: [{
+    ip: String,
+    userAgent: String,
+    date: { type: Date, default: Date.now }
+  }],
+  tokenVersion: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

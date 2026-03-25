@@ -18,6 +18,14 @@ export async function GET(req: NextRequest) {
     const user = await User.findById(payload.id).select('-password');
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
     
+    if (user.status === 'BANNED' || user.status === 'SUSPENDED') {
+      return NextResponse.json({ error: 'Account suspended or banned' }, { status: 403 });
+    }
+    
+    if (payload.tokenVersion !== undefined && user.tokenVersion !== payload.tokenVersion) {
+      return NextResponse.json({ error: 'Session invalidated' }, { status: 401 });
+    }
+    
     return NextResponse.json({ user });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

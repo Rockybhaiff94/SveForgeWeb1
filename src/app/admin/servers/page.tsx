@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Power, PowerOff, Trash, Plus } from 'lucide-react';
+import { Power, PowerOff, Trash, Plus, Settings } from 'lucide-react';
+import { ServerModal } from '@/components/admin/ServerModal';
 
 export default function ServersPage() {
   const [servers, setServers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedServer, setSelectedServer] = useState<any | null>(null);
 
   const fetchServers = async () => {
     try {
@@ -87,15 +89,19 @@ export default function ServersPage() {
                       <div className="text-xs text-gray-400">{server.cpu} Cores</div>
                     </TableCell>
                     <TableCell className="text-right space-x-2">
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedServer(server)} title="Inspect Server">
+                        <Settings size={16} className="text-blue-400 hover:text-blue-300" />
+                      </Button>
                       <Button 
                         variant="ghost" 
                         size="sm"
                         className={server.status === 'ONLINE' ? 'text-yellow-500 hover:text-yellow-400' : 'text-green-500 hover:text-green-400'}
                         onClick={() => handleStatusChange(server._id, server.status)}
+                        title={server.status === 'ONLINE' ? 'Stop' : 'Start'}
                       >
                         {server.status === 'ONLINE' ? <PowerOff size={16} /> : <Power size={16} />}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(server._id)} className="text-red-400 hover:text-red-300">
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(server._id)} className="text-red-400 hover:text-red-300" title="Delete">
                         <Trash size={16} />
                       </Button>
                     </TableCell>
@@ -111,6 +117,14 @@ export default function ServersPage() {
           )}
         </CardContent>
       </Card>
+      
+      {selectedServer && (
+        <ServerModal 
+          server={selectedServer}
+          onClose={() => setSelectedServer(null)}
+          onRefresh={fetchServers}
+        />
+      )}
     </div>
   );
 }

@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash, Edit2 } from 'lucide-react';
+import { Trash, Edit2, ShieldAlert } from 'lucide-react';
+import { UserModal } from '@/components/admin/UserModal';
 
 export default function UsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -78,8 +80,11 @@ export default function UsersPage() {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedUser(user)} title="Inspect User">
+                        <ShieldAlert size={16} className="text-blue-400 hover:text-blue-300" />
+                      </Button>
                       <Button variant="ghost" size="sm"><Edit2 size={16} /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(user._id)} className="text-red-400 hover:text-red-300">
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(user._id)} className="text-red-400 hover:text-red-300" title="Delete">
                         <Trash size={16} />
                       </Button>
                     </TableCell>
@@ -90,6 +95,14 @@ export default function UsersPage() {
           )}
         </CardContent>
       </Card>
+      
+      {selectedUser && (
+        <UserModal 
+          user={selectedUser} 
+          onClose={() => setSelectedUser(null)} 
+          onRefresh={fetchUsers} 
+        />
+      )}
     </div>
   );
 }
