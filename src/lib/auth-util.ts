@@ -46,8 +46,16 @@ export async function verifyToken() {
     if (!token) return null;
 
     try {
-        const decoded = jwt.decode(token) as { id: string, role: string };
-        return decoded;
+        const decoded = jwt.decode(token) as { id?: string, userId?: string, discordId?: string, role: string };
+        // Facilitate compatibility between legacy 'userId' and enterprise 'id'
+        const id = decoded.id || decoded.userId;
+        if (!id) return null;
+        
+        return {
+            ...decoded,
+            id,
+            userId: id // Ensure userId exists for legacy code
+        };
     } catch (error) {
         return null;
     }

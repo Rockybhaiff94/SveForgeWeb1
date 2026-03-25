@@ -15,18 +15,15 @@ export async function GET() {
             return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Retrieve servers where ownerId matches EITHER the MongoDB _id OR the Discord ID
+        // Retrieve servers where ownerId matches the user ID
         const servers = await Server.find({ 
-            $or: [
-                { ownerId: session.userId },
-                { ownerId: session.discordId }
-            ]
+            ownerId: session.id
         }).sort({ createdAt: -1 }).lean();
 
         return NextResponse.json({
             success: true,
             servers,
-            debug: { userId: session.userId, discordId: session.discordId } // useful if we need to see it in terminal
+            debug: { id: session.id } 
         });
 
     } catch (error) {

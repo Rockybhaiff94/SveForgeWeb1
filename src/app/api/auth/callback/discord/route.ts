@@ -100,11 +100,13 @@ export async function GET(req: NextRequest) {
             });
         }
 
-        // 4. Sign a JWT
+        // 4. Sign a JWT with Enterprise Standard
         const token = jwt.sign(
             {
-                userId: user._id.toString(),
-                discordId: user.discordId,
+                id: user._id.toString(),
+                role: user.role || 'USER',
+                // For compatibility if needed by other legacy routes
+                userId: user._id.toString()
             },
             JWT_SECRET!,
             { expiresIn: '7d' }
@@ -112,11 +114,11 @@ export async function GET(req: NextRequest) {
 
         console.log('JWT Signed successfully');
 
-        // 5. Build redirect and set the session cookie
+        // 5. Build redirect and set the enterprise session cookie
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${req.nextUrl.protocol}//${req.nextUrl.host}`;
         const response = NextResponse.redirect(new URL('/dashboard', baseUrl));
 
-        response.cookies.set('token', token, {
+        response.cookies.set('sf_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',

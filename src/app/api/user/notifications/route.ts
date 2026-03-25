@@ -12,15 +12,10 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
         }
 
-        // We can fetch notifications by discordId or mongo _id depending on how it was saved
-        const userId = session.userId;
-        const discordIdStr = session.discordId || userId;
+        const userId = session.id;
         
         const notifications = await Notification.find({
-            $or: [
-                { userId: userId },
-                { userId: discordIdStr }
-            ]
+            userId: userId
         }).sort({ createdAt: -1 }).limit(20);
 
         return NextResponse.json({ success: true, notifications });

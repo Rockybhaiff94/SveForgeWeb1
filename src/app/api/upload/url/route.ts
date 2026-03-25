@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         // 3. Generate Unique Safe Filename
         const ext = fileName.split('.').pop() || 'png';
         const uniqueId = crypto.randomBytes(16).toString('hex');
-        const s3Key = `uploads/${session.userId}/${uniqueId}.${ext}`;
+        const s3Key = `uploads/${session.id}/${uniqueId}.${ext}`;
         const bucketName = process.env.AWS_S3_BUCKET_NAME || '';
 
         if (!bucketName) {
