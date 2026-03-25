@@ -1,135 +1,127 @@
-import React from "react";
-import { Users, Server, AlertCircle, TrendingUp, CheckCircle, XCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Users, Server, Activity, ShieldAlert } from 'lucide-react';
+import dbConnect from '@/lib/mongodb';
+import UserModel from '@/models/User';
+import ServerModel from '@/models/Server';
 
-export default function AdminDashboardPage() {
+export const revalidate = 60; // Revalidate every minute
+
+async function getStats() {
+    await dbConnect();
+    
+    const [totalUsers, totalServers, activeServers] = await Promise.all([
+        UserModel.countDocuments(),
+        ServerModel.countDocuments(),
+        ServerModel.countDocuments({ status: 'online' }),
+    ]);
+    
+    return {
+        totalUsers,
+        totalServers,
+        activeServers,
+    };
+}
+
+export default async function AdminDashboardPage() {
+    const stats = await getStats();
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-extrabold text-white tracking-tight">Admin Dashboard</h1>
-                <p className="text-gray-400 mt-1">Manage servers, users, and review reports.</p>
+                <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard Overview</h1>
+                <p className="text-sm text-zinc-400 mt-1">Real-time metrics and system status.</p>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="glass-panel" hoverEffect={false}>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center">
-                                <Users className="w-5 h-5" />
-                            </div>
-                        </div>
-                        <p className="text-4xl font-bold text-white mb-1">12,482</p>
-                        <p className="text-sm font-medium text-gray-400">Total Users</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="glass-panel" hoverEffect={false}>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-[#8B5CF6]/20 text-[#8B5CF6] flex items-center justify-center">
-                                <Server className="w-5 h-5" />
-                            </div>
-                        </div>
-                        <p className="text-4xl font-bold text-white mb-1">842</p>
-                        <p className="text-sm font-medium text-gray-400">Total Servers listed</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="glass-panel" hoverEffect={false}>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-[#F97316]/20 text-[#F97316] flex items-center justify-center">
-                                <CheckCircle className="w-5 h-5" />
-                            </div>
-                        </div>
-                        <p className="text-4xl font-bold text-white mb-1">14</p>
-                        <p className="text-sm font-medium text-[#F97316] animate-pulse">Pending Approvals</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="glass-panel" hoverEffect={false}>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-[#EF4444]/20 text-[#EF4444] flex items-center justify-center">
-                                <AlertCircle className="w-5 h-5" />
-                            </div>
-                        </div>
-                        <p className="text-4xl font-bold text-white mb-1">5</p>
-                        <p className="text-sm font-medium text-[#EF4444] animate-pulse">Active Reports</p>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card 
+                    title="Total Users" 
+                    value={stats.totalUsers.toString()} 
+                    icon={<Users className="w-5 h-5 text-indigo-400" />} 
+                    trend="+12%" 
+                />
+                <Card 
+                    title="Total Servers" 
+                    value={stats.totalServers.toString()} 
+                    icon={<Server className="w-5 h-5 text-emerald-400" />} 
+                    trend="+3" 
+                />
+                <Card 
+                    title="Active Servers" 
+                    value={stats.activeServers.toString()} 
+                    icon={<Activity className="w-5 h-5 text-blue-400" />} 
+                    subtitle={`${stats.totalServers > 0 ? Math.round((stats.activeServers / stats.totalServers) * 100) : 0}% of total`}
+                />
+                <Card 
+                    title="System Status" 
+                    value="Healthy" 
+                    icon={<ShieldAlert className="w-5 h-5 text-emerald-500" />} 
+                    valueColor="text-emerald-500"
+                />
             </div>
 
-            {/* Main Admin Panels */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* Pending Approvals List */}
-                <div className="lg:col-span-2 space-y-4">
-                    <Card className="glass-panel h-full" hoverEffect={false}>
-                        <CardHeader className="border-b border-white/10 pb-4">
-                            <CardTitle className="flex items-center gap-2">
-                                <CheckCircle className="w-5 h-5 text-[#F97316]" /> Pending Approvals
-                            </CardTitle>
-                            <CardDescription>Servers waiting for manual review before being listed.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <ul className="divide-y divide-white/5">
-                                {[1, 2, 3].map((i) => (
-                                    <li key={i} className="p-4 sm:px-6 hover:bg-white/5 transition-colors flex items-center justify-between gap-4">
-                                        <div className="flex flex-col gap-1">
-                                            <p className="text-sm font-semibold text-white">New RPG Realm {i}</p>
-                                            <p className="text-xs text-gray-500">Submitted by User{89 + i} • 2 hours ago</p>
-                                        </div>
-                                        <div className="flex gap-2 shrink-0">
-                                            <Button variant="outline" size="sm" className="text-[#10B981] hover:bg-[#10B981]/20 hover:text-[#34D399] border-[#10B981]/30">
-                                                <CheckCircle className="w-4 h-4 mr-1" /> Approve
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="text-[#EF4444] hover:bg-[#EF4444]/20 hover:text-[#FCA5A5] border-[#EF4444]/30">
-                                                <XCircle className="w-4 h-4 mr-1" /> Reject
-                                            </Button>
-                                        </div>
-                                    </li>
-                                ))}
-                                {/* Empty state when no pending approvals */}
-                                {false && (
-                                    <div className="p-8 text-center text-gray-500">
-                                        No pending server approvals at this time.
-                                    </div>
-                                )}
-                            </ul>
-                        </CardContent>
-                    </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 bg-zinc-950 border border-zinc-800 rounded-xl p-6 shadow-sm">
+                    <h2 className="text-lg font-semibold text-white mb-4">Latest Activity</h2>
+                    <div className="space-y-4">
+                        {/* Placeholder for real activity feed */}
+                        <ActivityItem action="User Registered" time="5 mins ago" desc="New user joined the platform." />
+                        <ActivityItem action="Server Added" time="15 mins ago" desc="Minecraft Server 'Survival Realm' added." />
+                        <ActivityItem action="Admin Login" time="1 hour ago" desc="Successful admin login." />
+                        <ActivityItem action="Server Offline" time="2 hours ago" desc="Server 'Creative Builds' went offline." />
+                    </div>
                 </div>
-
-                {/* Quick Actions / Recent Activity */}
-                <div className="space-y-4">
-                    <Card className="glass-panel" hoverEffect={false}>
-                        <CardHeader className="border-b border-white/10 pb-4">
-                            <CardTitle className="flex items-center gap-2">
-                                <AlertCircle className="w-5 h-5 text-[#EF4444]" /> Recent Reports
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <ul className="divide-y divide-white/5">
-                                {[1, 2].map((i) => (
-                                    <li key={i} className="p-4 hover:bg-white/5 transition-colors flex flex-col gap-2">
-                                        <div className="flex justify-between items-start">
-                                            <p className="text-sm font-semibold text-white">Rule Violation</p>
-                                            <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded border border-red-500/30">High Priority</span>
-                                        </div>
-                                        <p className="text-xs text-gray-400">Reported server "Toxic PvP" for fake player counts.</p>
-                                        <div className="mt-2 flex justify-end">
-                                            <Button variant="outline" size="sm" className="h-7 text-xs">Review Report</Button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
+                
+                <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 shadow-sm">
+                    <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+                    <div className="space-y-3">
+                        <button className="w-full text-left px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-800/50 transition-all text-sm font-medium text-zinc-300 hover:text-white">
+                            Restart All Services
+                        </button>
+                        <button className="w-full text-left px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-800/50 transition-all text-sm font-medium text-zinc-300 hover:text-white">
+                            Clear System Cache
+                        </button>
+                        <button className="w-full text-left px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-800/50 transition-all text-sm font-medium text-zinc-300 hover:text-white">
+                            View Error Logs
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
+    );
+}
 
+function Card({ title, value, icon, trend, subtitle, valueColor = "text-white" }: any) {
+    return (
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full -mr-10 -mt-10 group-hover:bg-indigo-500/10 transition-colors duration-500"></div>
+            <div className="flex items-center justify-between z-10">
+                <h3 className="text-zinc-400 font-medium text-sm">{title}</h3>
+                <div className="p-2 bg-zinc-900 rounded-lg border border-zinc-800/50">
+                    {icon}
+                </div>
+            </div>
+            <div className="mt-4 z-10">
+                <p className={`text-3xl font-bold tracking-tight ${valueColor}`}>{value}</p>
+                {(trend || subtitle) && (
+                    <p className="text-xs text-zinc-500 mt-2 font-medium">
+                        {trend && <span className="text-emerald-400 mr-2">{trend}</span>}
+                        {subtitle}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function ActivityItem({ action, time, desc }: any) {
+    return (
+        <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-zinc-900/50 transition-colors group">
+            <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 group-hover:scale-125 transition-transform"></div>
+            <div>
+                <p className="text-sm font-medium text-zinc-200">{action}</p>
+                <p className="text-xs text-zinc-500 mt-1">{desc}</p>
+            </div>
+            <div className="ml-auto">
+                <span className="text-xs text-zinc-600 font-medium">{time}</span>
             </div>
         </div>
     );

@@ -18,11 +18,15 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         sparse: true, // allows multiple documents with null/missing email
     },
+    password: {
+        type: String,
+    },
     accessToken: {
         type: String,
     },
     role: {
         type: String,
+        enum: ['user', 'OWNER', 'ADMIN', 'DEV', 'MOD'],
         default: 'user',
     },
     createdAt: {
