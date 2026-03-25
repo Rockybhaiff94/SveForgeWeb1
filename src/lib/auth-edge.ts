@@ -5,7 +5,9 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback_
 export async function verifyJwtEdge(token: string) {
     try {
         const { payload } = await jwtVerify(token, JWT_SECRET);
-        return payload as { userId: string, role?: string };
+        const p = payload as any;
+        const id = p.id || p.userId;
+        return { ...p, id, userId: id };
     } catch (error) {
         return null;
     }
