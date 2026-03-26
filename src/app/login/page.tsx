@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
-function LoginMessage({ error }: { error: string | null }) {
+function LoginMessage({ error, details }: { error: string | null, details: string | null }) {
     const errorMessages: Record<string, string> = {
         'auth_failed': 'Authentication failed. Please check your Discord settings and try again.',
         'no_code': 'No authorization code received from Discord.',
@@ -15,13 +15,20 @@ function LoginMessage({ error }: { error: string | null }) {
 
     if (error) {
         return (
-            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl space-y-2 mb-6">
-                <p className="text-sm text-red-400 text-center font-bold">
+            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl space-y-2 mb-6 text-center break-words">
+                <p className="text-sm text-red-400 font-bold">
                     {errorMessages[error] || errorMessages.default}
                 </p>
-                <p className="text-[10px] text-gray-500 text-center uppercase tracking-widest">
-                    Reference: {error}
-                </p>
+                <div className="flex flex-col gap-1 mt-2">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">
+                        Reference: {error}
+                    </p>
+                    {details && (
+                        <p className="text-[10px] text-red-300 font-mono bg-black/40 p-1.5 rounded-md inline-block max-w-full overflow-hidden text-ellipsis">
+                            Detail: {details}
+                        </p>
+                    )}
+                </div>
             </div>
         );
     }
