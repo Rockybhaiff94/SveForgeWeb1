@@ -1,7 +1,13 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.SERVERFORGE_API || 'http://localhost:8080';
+const getBaseUrl = () => {
+    if (process.env.SERVERFORGE_API) return process.env.SERVERFORGE_API;
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}/_/backend`;
+    if (process.env.NEXT_PUBLIC_BASE_URL) return `${process.env.NEXT_PUBLIC_BASE_URL}/_/backend`;
+    return 'http://localhost:8080';
+};
+const API_BASE_URL = getBaseUrl();
 
 /**
  * Forwards an incoming Next.js Request to the external backend API.
