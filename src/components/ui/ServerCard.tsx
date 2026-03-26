@@ -61,8 +61,7 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
         <Card className={`flex flex-col h-full group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative backdrop-blur-xl saturate-150`}>
 
             {/* Top Banner Section (16:9) */}
-            <div className="relative aspect-video w-full rounded-t-3xl z-10">
-                {/* Background & Image Container with overflow-hidden for rounded corners */}
+            <div className="relative aspect-video w-full rounded-t-3xl z-10 shrink-0">
                 <div className="absolute inset-0 overflow-hidden rounded-t-3xl bg-[#050505]">
                     {server.bannerImage ? (
                         <Image
@@ -74,18 +73,15 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                     ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-[#1E3A8A] to-[#1E40AF] transition-transform duration-200 group-hover:scale-[1.03]" />
                     )}
-                    {/* Banner Overlay for readability */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/80 pointer-events-none" />
                 </div>
 
-                {/* Game Logo Identifier (Top-Left) */}
-                <div className="absolute top-[12px] left-[12px] w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] rounded-md bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center z-20 shadow-sm overflow-hidden text-clip">
+                <div className="absolute top-[12px] left-[12px] w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] rounded-md bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center z-20 shadow-sm overflow-hidden text-clip">
                     <Gamepad2 className="w-[20px] h-[20px] text-gray-300" />
                 </div>
 
-                {/* Status Badge (Top-Right) */}
                 <div className="absolute top-[12px] right-[12px] z-20">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-md border border-white/10">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10">
                         {server.status === "online" ? (
                             <>
                                 <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
@@ -105,8 +101,8 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                     </div>
                 </div>
 
-                {/* Server Logo (Overlapping bottom-left) */}
-                <div className="absolute -bottom-6 left-4 rounded-[40%] overflow-hidden border border-[#3B82F6]/30 bg-[#050505] w-[64px] h-[64px] shadow-lg z-30 flex items-center justify-center">
+                {/* Overlapping Server Icon */}
+                <div className="absolute -bottom-[32px] left-[16px] rounded-[30%] overflow-hidden border-4 border-[#121212] bg-[#050505] w-[64px] h-[64px] shadow-lg z-30 flex items-center justify-center box-content">
                     {server.logoImage ? (
                         <Image src={server.logoImage} alt={server.serverName || server.name || "Logo"} fill className="object-cover" />
                     ) : (
@@ -118,83 +114,74 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
             </div>
 
             {/* Content Section */}
-            <CardContent className="flex flex-col flex-grow pt-7 pb-4 px-4 z-10">
-                {/* Main Info Row */}
-                <div className="flex justify-between items-start mb-1.5 gap-2">
+            <CardContent className="flex flex-col flex-grow pt-10 pb-5 px-5 z-10">
+                {/* Header Content */}
+                <div className="flex justify-between items-start mb-2 gap-3">
                     <Link href={`/server/${server.slug || server._id}`} className="hover:text-[#3B82F6] transition-colors flex-1 min-w-0">
-                        <h2 className="text-lg font-bold truncate text-white tracking-tight">{server.serverName || server.name}</h2>
+                        <h2 className="text-[18px] font-bold truncate text-white tracking-tight leading-tight">{server.serverName || server.name}</h2>
                     </Link>
-                    {/* Region Badge */}
-                    <div className="shrink-0 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
-                        <span className="text-[10px] font-semibold text-gray-300 tracking-wide uppercase">{server.region || "Global"}</span>
+                    <div className="shrink-0 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 shadow-[0_0_10px_rgba(255,255,255,0.02)] mt-0.5">
+                        <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">{server.region || "Global"}</span>
                     </div>
                 </div>
 
-                {/* Description */}
-                <p className="text-xs text-gray-400 line-clamp-2 mb-3 tracking-wide min-h-[32px]">
+                <p className="text-[13px] text-gray-400 line-clamp-2 mb-3 leading-relaxed min-h-[38px]">
                     {server.description}
                 </p>
 
-                {/* Type Tags */}
-                <div className="flex flex-wrap gap-1 mb-4">
+                {/* Tags Section */}
+                <div className="flex flex-wrap gap-1.5 mb-4">
                     {server.tags?.slice(0, 3).map((tag) => (
-                        <div key={tag} className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-medium text-gray-300">
+                        <div key={tag} className="px-2 py-0.5 rounded text-[11px] font-medium text-gray-300 bg-white/5 border border-white/5 tracking-wide">
                             {tag}
                         </div>
                     ))}
                     {server.tags?.length > 3 && (
-                        <div className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-medium text-gray-300">
+                        <div className="px-2 py-0.5 rounded text-[11px] font-medium text-gray-300 bg-white/5 border border-white/5 tracking-wide">
                             +{server.tags.length - 3}
                         </div>
                     )}
                 </div>
 
-                {/* Spacer to push stats & buttons to bottom if content is short */}
                 <div className="flex-grow" />
 
-                {/* Structured Stats Row */}
-                <div className="flex items-center justify-between text-[10px] font-medium text-gray-400 mb-4 bg-black/20 px-2 py-1.5 rounded-lg border border-white/5">
-                    {/* Left: Players & Ping */}
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1" title="Online Players">
-                            <Users className="w-3 h-3 text-[#3B82F6]" />
-                            <span>
-                                {server.players ?? 0}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-1" title="Server Ping">
-                            <Activity className="w-3 h-3 text-emerald-400" />
-                            <span>{server.ping || "32ms"}</span>
-                        </div>
+                {/* Single Horizontal Stats Row */}
+                <div className="flex items-center justify-between text-[11px] font-medium text-gray-300 mb-5 pb-1">
+                    <div className="flex items-center gap-1" title="Online Players">
+                        <Users className="w-4 h-4 text-[#3B82F6]" />
+                        <span>{server.players ?? 0}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1" title="Server Ping">
+                        <Activity className="w-4 h-4 text-emerald-400" />
+                        <span>{server.ping || "32ms"}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1" title="Rating">
+                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400/20" />
+                        <span>{server.ratingAverage.toFixed(1)}</span>
                     </div>
 
-                    {/* Right: Rating & Votes */}
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1" title="Rating">
-                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400/20" />
-                            <span>{server.ratingAverage.toFixed(1)}</span>
-                        </div>
-                        <div className="flex items-center gap-1" title="Votes">
-                            <Crown className="w-3 h-3 text-purple-400" />
-                            <span>{server.votes.toLocaleString("en-US")}</span>
-                        </div>
+                    <div className="flex items-center gap-1" title="Votes">
+                        <Crown className="w-4 h-4 text-purple-400" />
+                        <span>{server.votes.toLocaleString("en-US")}</span>
                     </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-row gap-3">
                     <Link href={`/server/${server.slug || server._id}`} className="flex-1">
                         <Button
-                            className="w-full h-9 text-xs rounded-lg bg-[var(--color-online)] hover:bg-[var(--color-online)] hover:brightness-110 font-bold text-white tracking-wide transition-all duration-200 border-none uppercase shadow-none hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:-translate-y-0.5"
+                            className="w-full h-10 rounded-md bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold text-[13px] tracking-wide transition-all border-none shadow-none hover:shadow-[0_4px_14px_rgba(34,197,94,0.39)] uppercase"
                         >
-                            Join
+                            JOIN
                         </Button>
                     </Link>
                     <Link href={`/vote/${server.slug || server._id}`} className="flex-1">
                         <Button
-                            className="w-full h-9 text-xs rounded-lg bg-[#3B82F6] hover:bg-[#60A5FA] font-bold text-white tracking-wide transition-all duration-200 border-none uppercase shadow-none hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] hover:-translate-y-0.5"
+                            className="w-full h-10 rounded-md bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-[13px] tracking-wide transition-all border-none shadow-none hover:shadow-[0_4px_14px_rgba(88,101,242,0.39)] uppercase"
                         >
-                            Vote
+                            VOTE
                         </Button>
                     </Link>
                 </div>
