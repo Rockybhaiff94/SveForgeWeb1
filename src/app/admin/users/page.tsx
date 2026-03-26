@@ -1,108 +1,96 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Table, TableHeader, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Trash, Edit2, ShieldAlert } from 'lucide-react';
-import { UserModal } from '@/components/admin/UserModal';
+import React from 'react';
+import { motion } from 'framer-motion';
+import GlassCard from '@/components/admin/GlassCard';
+import { Users as UsersIcon, Shield, Mail, UserPlus, MoreHorizontal } from 'lucide-react';
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
-
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch('/api/users');
-      const data = await res.json();
-      if(data.users) setUsers(data.users);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const handleDelete = async (id: string) => {
-    if(confirm('Are you sure you want to delete this user?')) {
-      await fetch(`/api/users?id=${id}`, { method: 'DELETE' });
-      fetchUsers();
-    }
-  };
+  const users = [
+    { id: 1, name: 'Alex Johnson', email: 'alex@serverforge.com', role: 'Super Admin', status: 'Active' },
+    { id: 2, name: 'Sarah Miller', email: 'sarah@serverforge.com', role: 'Moderator', status: 'Active' },
+    { id: 3, name: 'Michael Chen', email: 'mchen@serverforge.com', role: 'Admin', status: 'Inactive' },
+    { id: 4, name: 'Emma Wilson', email: 'emma@serverforge.com', role: 'Moderator', status: 'Active' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+    >
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">User Management</h1>
-          <p className="text-sm text-gray-400 mt-1">Manage platform users, roles, and permissions.</p>
+          <h2 style={{ fontSize: '1.875rem', fontWeight: 700, color: 'white' }}>User Management</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Manage administrators and moderators permissions.</p>
         </div>
-      </div>
+        <button className="glass-button" style={{ 
+          padding: '10px 18px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px',
+          background: 'var(--primary)',
+          color: 'white',
+          border: 'none',
+          cursor: 'pointer'
+        }}>
+          <UserPlus size={18} />
+          <span>Invite Team Member</span>
+        </button>
+      </header>
 
-      <Card>
-        <CardHeader>All Users</CardHeader>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="p-6 text-center text-gray-400">Loading users...</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <tbody>
-                {users.map(user => (
-                  <TableRow key={user._id}>
-                    <TableCell>
-                      <div className="font-medium text-gray-200">{user.name}</div>
-                      <div className="text-xs text-gray-500">{user.email}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === 'OWNER' ? 'danger' : user.role === 'ADMIN' ? 'warning' : 'default'}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.status === 'ACTIVE' ? 'success' : 'danger'}>
-                        {user.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-400">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedUser(user)} title="Inspect User">
-                        <ShieldAlert size={16} className="text-blue-400 hover:text-blue-300" />
-                      </Button>
-                      <Button variant="ghost" size="sm"><Edit2 size={16} /></Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(user._id)} className="text-red-400 hover:text-red-300" title="Delete">
-                        <Trash size={16} />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-      
-      {selectedUser && (
-        <UserModal 
-          user={selectedUser} 
-          onClose={() => setSelectedUser(null)} 
-          onRefresh={fetchUsers} 
-        />
-      )}
-    </div>
+      <GlassCard title="Team Members" subtitle="Active users with administrative access">
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>USER</th>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>ROLE</th>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>STATUS</th>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontWeight: 600 }}>
+                        {user.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>{user.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem' }}>
+                      <Shield size={14} color="var(--primary)" />
+                      {user.role}
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      fontWeight: 600, 
+                      color: user.status === 'Active' ? '#22c55e' : '#94a3b8',
+                      padding: '2px 8px',
+                      background: user.status === 'Active' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(148, 163, 184, 0.1)',
+                      borderRadius: '12px'
+                    }}>
+                      {user.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <button style={{ color: 'var(--text-secondary)', cursor: 'pointer' }}><MoreHorizontal size={18} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+    </motion.div>
   );
 }

@@ -1,146 +1,105 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Table, TableHeader, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Search, Filter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { motion } from 'framer-motion';
+import GlassCard from '@/components/admin/GlassCard';
+import { Terminal, Search, Filter, Download, AlertCircle, Info, CheckCircle, AlertTriangle } from 'lucide-react';
+
+const LogIcon = ({ type }: { type: string }) => {
+  switch (type) {
+    case 'error': return <AlertCircle size={14} color="#ef4444" />;
+    case 'warning': return <AlertTriangle size={14} color="#eab308" />;
+    case 'success': return <CheckCircle size={14} color="#22c55e" />;
+    default: return <Info size={14} color="#6366f1" />;
+  }
+};
 
 export default function LogsPage() {
-  const [logs, setLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('ALL');
-
-  const fetchLogs = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/logs');
-      const data = await res.json();
-      if(data.logs) setLogs(data.logs);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchLogs();
-    const interval = setInterval(fetchLogs, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const filteredLogs = logs.filter(log => {
-    if (typeFilter !== 'ALL' && log.type !== typeFilter) return false;
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      return (
-        log.action.toLowerCase().includes(term) ||
-        (log.ipAddress && log.ipAddress.includes(term)) ||
-        (log.details && log.details.toLowerCase().includes(term)) ||
-        (log.userId?.email && log.userId.email.toLowerCase().includes(term))
-      );
-    }
-    return true;
-  });
+  const logs = [
+    { id: 1, timestamp: '2026-03-26 04:05:12', type: 'info', node: 'Edge-US-East', message: 'Node health check passed' },
+    { id: 2, timestamp: '2026-03-26 04:02:45', type: 'error', node: 'Core-DB-01', message: 'Connection timeout on secondary partition' },
+    { id: 3, timestamp: '2026-03-26 03:58:20', type: 'warning', node: 'Static-CDN', message: 'High cache miss rate detected in Tokyo' },
+    { id: 4, timestamp: '2026-03-26 03:55:01', type: 'success', node: 'API-Gateway', message: 'New SSL certificate deployed' },
+    { id: 5, timestamp: '2026-03-26 03:52:33', type: 'info', node: 'Autoscale-Mgr', message: 'Triggered scale-up for US-West region' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+    >
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Global Audit Logs</h1>
-          <p className="text-sm text-gray-400 mt-1">Enterprise audit trail with comprehensive target and IP tracking.</p>
+          <h2 style={{ fontSize: '1.875rem', fontWeight: 700, color: 'white' }}>System Logs</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Real-time audit trails and system activity logs.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+        <button className="glass-button" style={{ 
+          padding: '10px 18px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px',
+          background: 'rgba(255,255,255,0.05)',
+          color: 'white',
+          cursor: 'pointer'
+        }}>
+          <Download size={18} />
+          <span>Export Logs</span>
+        </button>
+      </header>
+
+      <GlassCard title="Audit Trail" subtitle="Recent system events">
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ position: 'relative', flexGrow: 1 }}>
+            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
             <input 
               type="text" 
-              placeholder="Search IP, User, Action..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-[#1e1f22] border border-[#2b2d31] rounded-lg text-sm text-gray-200 focus:outline-none focus:border-blue-500 w-64"
-              title="Search Logs"
+              placeholder="Filter logs by message, node, or type..."
+              style={{
+                width: '100%',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '10px',
+                padding: '10px 12px 10px 40px',
+                color: 'white',
+                outline: 'none'
+              }}
             />
           </div>
-          <select 
-            value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
-            className="px-3 py-2 bg-[#1e1f22] border border-[#2b2d31] rounded-lg text-sm text-gray-200 focus:outline-none"
-            title="Filter by Type"
-            aria-label="Filter logs by type"
-          >
-            <option value="ALL">All Events</option>
-            <option value="ACTION">Actions</option>
-            <option value="INFO">Info</option>
-            <option value="WARNING">Warnings</option>
-            <option value="ERROR">Errors</option>
-          </select>
-          <Button variant="outline" onClick={fetchLogs} disabled={loading} title="Refresh logs">
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-          </Button>
+          <button style={{ padding: '10px 16px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+            <Filter size={18} />
+            <span>Types</span>
+          </button>
         </div>
-      </div>
 
-      <Card>
-        <CardHeader>System Activity</CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>Event</TableHead>
-                <TableHead>Actor / IP</TableHead>
-                <TableHead>Target</TableHead>
-                <TableHead>Details</TableHead>
-              </TableRow>
-            </TableHeader>
-            <tbody>
-              {filteredLogs.map(log => (
-                <TableRow key={log._id}>
-                  <TableCell className="text-xs text-gray-400 w-32 whitespace-nowrap">
-                    {new Date(log.createdAt).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col items-start gap-1">
-                      <Badge variant={
-                        log.type === 'ERROR' ? 'danger' : 
-                        log.type === 'WARNING' ? 'warning' : 'default'
-                      }>
-                        {log.type}
-                      </Badge>
-                      <span className="text-xs font-semibold text-gray-300">{log.action}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm font-medium text-blue-400">
-                      {log.userId?.name || 'System'}
-                      {log.actorRole && <span className="text-gray-500 text-xs ml-1">({log.actorRole})</span>}
-                    </div>
-                    <div className="text-xs text-gray-500 font-mono mt-1">{log.ipAddress || 'Internal'}</div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="border-[#2b2d31] text-gray-300 bg-[#2b2d31]/30">
-                      {log.targetType || 'System'}
-                    </Badge>
-                    {log.targetId && <div className="text-xs text-gray-500 font-mono mt-1 truncate max-w-[120px]" title={log.targetId}>{log.targetId}</div>}
-                  </TableCell>
-                  <TableCell className="text-gray-400 text-sm max-w-sm truncate">
-                    <span title={log.details || ''}>{log.details || '-'}</span>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredLogs.length === 0 && !loading && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-500 py-8">
-                    {logs.length > 0 ? 'No logs match your filters.' : 'No audit logs exist yet.'}
-                  </TableCell>
-                </TableRow>
-              )}
-            </tbody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+        <div style={{ 
+          background: 'rgba(0,0,0,0.2)', 
+          borderRadius: '12px', 
+          padding: '16px', 
+          fontFamily: 'monospace',
+          fontSize: '0.8125rem',
+          color: '#94a3b8',
+          border: '1px solid rgba(255,255,255,0.05)'
+        }}>
+          {logs.map((log) => (
+            <div key={log.id} style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '180px 100px 120px 1fr',
+              gap: '16px',
+              padding: '8px 0',
+              borderBottom: '1px solid rgba(255,255,255,0.03)'
+            }}>
+              <span style={{ color: '#64748b' }}>[{log.timestamp}]</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', textTransform: 'uppercase', fontWeight: 600, fontSize: '0.75rem' }}>
+                <LogIcon type={log.type} />
+                {log.type}
+              </span>
+              <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{log.node}</span>
+              <span style={{ color: '#e2e8f0' }}>{log.message}</span>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
+    </motion.div>
   );
 }

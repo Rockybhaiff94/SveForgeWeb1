@@ -17,6 +17,11 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1007.0",
     "@aws-sdk/s3-request-presigner": "^3.1007.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.9",
+    "@mui/material": "^7.3.9",
+    "@reduxjs/toolkit": "^2.11.2",
     "@types/cookie": "^0.6.0",
     "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
@@ -40,6 +45,8 @@
     "pg": "^8.19.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-redux": "^9.2.0",
+    "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6"
   },

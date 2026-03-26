@@ -1,75 +1,104 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import GlassCard from '@/components/admin/GlassCard';
+import { Globe, Bell, Cpu, Lock, Shield, Save } from 'lucide-react';
+
+const SettingItem = ({ icon: Icon, title, description, children }: any) => (
+  <div style={{ 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    padding: '20px 0',
+    borderBottom: '1px solid rgba(255,255,255,0.05)'
+  }}>
+    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+      <div style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', color: 'var(--text-secondary)' }}>
+        <Icon size={20} />
+      </div>
+      <div>
+        <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'white' }}>{title}</p>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{description}</p>
+      </div>
+    </div>
+    <div>{children}</div>
+  </div>
+);
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100">Global Settings</h1>
-        <p className="text-sm text-gray-400 mt-1">Platform configuration and variables.</p>
-      </div>
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+    >
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.875rem', fontWeight: 700, color: 'white' }}>Platform Settings</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Global configuration and security controls for ServerForge.</p>
+        </div>
+        <button className="glass-button" style={{ 
+          padding: '10px 18px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px',
+          background: 'var(--primary)',
+          color: 'white',
+          border: 'none',
+          cursor: 'pointer'
+        }}>
+          <Save size={18} />
+          <span>Save Changes</span>
+        </button>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>General</CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label htmlFor="platformName" className="block text-xs font-semibold text-gray-400 uppercase mb-2">Platform Name</label>
-              <input 
-                id="platformName"
-                type="text" 
-                defaultValue="ServerForge" 
-                placeholder="ServerForge"
-                title="Platform Name"
-                className="w-full bg-[#1e1f22] border border-[#2b2d31] rounded-md px-4 py-2 text-gray-200" 
-              />
-            </div>
-            <div>
-              <label htmlFor="supportEmail" className="block text-xs font-semibold text-gray-400 uppercase mb-2">Support Email</label>
-              <input 
-                id="supportEmail"
-                type="email" 
-                defaultValue="support@serverforge.net" 
-                placeholder="support@serverforge.net"
-                title="Support Email"
-                className="w-full bg-[#1e1f22] border border-[#2b2d31] rounded-md px-4 py-2 text-gray-200" 
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 300px) 1fr', gap: '24px' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {['General', 'Security', 'Nodes', 'Billing', 'API Keys', 'Audit Log'].map((item, idx) => (
+            <button key={item} style={{ 
+              padding: '12px 16px', 
+              textAlign: 'left',
+              borderRadius: '10px',
+              fontSize: '0.875rem',
+              fontWeight: idx === 0 ? 600 : 500,
+              background: idx === 0 ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+              color: idx === 0 ? 'var(--primary)' : 'var(--text-secondary)',
+              border: idx === 0 ? '1px solid rgba(99, 102, 241, 0.2)' : '1px solid transparent',
+              cursor: 'pointer'
+            }}>
+              {item}
+            </button>
+          ))}
+        </nav>
 
-        <Card>
-          <CardHeader>Security</CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-[#1e1f22] border border-[#2b2d31] rounded-lg">
-              <div>
-                <p className="font-medium text-gray-200">Require 2FA</p>
-                <p className="text-xs text-gray-400">Force all admins to use 2FA</p>
-              </div>
-              <div className="w-10 h-6 bg-green-500 rounded-full flex items-center p-1 cursor-pointer">
-                <div className="w-4 h-4 bg-white rounded-full translate-x-4"></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-[#1e1f22] border border-[#2b2d31] rounded-lg">
-              <div>
-                <p className="font-medium text-gray-200">Auto-Ban System</p>
-                <p className="text-xs text-gray-400">Enable AI Moderation triggers</p>
-              </div>
-              <div className="w-10 h-6 bg-gray-600 rounded-full flex items-center p-1 cursor-pointer">
-                <div className="w-4 h-4 bg-white rounded-full"></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <GlassCard title="General Configuration">
+             <SettingItem icon={Globe} title="Platform Name" description="The public-facing name of your management console.">
+               <input type="text" defaultValue="ServerForge Cloud" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: 'white', outline: 'none' }} />
+             </SettingItem>
+             <SettingItem icon={Bell} title="System Notifications" description="Global broadcast for maintenance or updates.">
+                <div style={{ width: '40px', height: '20px', background: 'var(--primary)', borderRadius: '10px', position: 'relative', cursor: 'pointer' }}>
+                   <div style={{ width: '16px', height: '16px', background: 'white', borderRadius: '50%', position: 'absolute', right: '2px', top: '2px' }} />
+                </div>
+             </SettingItem>
+             <SettingItem icon={Cpu} title="Resource Monitoring" description="Interval for real-time telemetry updates (seconds).">
+                <input type="number" defaultValue="5" style={{ width: '80px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: 'white' }} />
+             </SettingItem>
+          </GlassCard>
+
+          <GlassCard title="Security & Compliance">
+             <SettingItem icon={Lock} title="Two-Factor Authentication" description="Enforce 2FA for all administrative accounts.">
+               <div style={{ width: '40px', height: '20px', background: '#334155', borderRadius: '10px', position: 'relative', cursor: 'pointer' }}>
+                   <div style={{ width: '16px', height: '16px', background: 'white', borderRadius: '50%', position: 'absolute', left: '2px', top: '2px' }} />
+                </div>
+             </SettingItem>
+             <SettingItem icon={Shield} title="RBAC Policy" description="Manage default permissions for new moderators.">
+                <button className="glass-button" style={{ padding: '6px 12px', fontSize: '0.75rem', cursor: 'pointer' }}>Configure Policy</button>
+             </SettingItem>
+          </GlassCard>
+        </div>
       </div>
-      
-      <div className="flex justify-end gap-3">
-        <Button variant="outline">Discard Changes</Button>
-        <Button>Save Settings</Button>
-      </div>
-    </div>
+    </motion.div>
   );
 }

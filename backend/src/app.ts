@@ -12,6 +12,7 @@ import logRoutes from './routes/logRoutes';
 import reportRoutes from './routes/reportRoutes';
 import featureFlagRoutes from './routes/featureFlagRoutes';
 import statsRoutes from './routes/statsRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/logs', logRoutes);
 app.use('/reports', reportRoutes);
 app.use('/features', featureFlagRoutes);
 app.use('/stats', statsRoutes);
+app.use('/analytics', analyticsRoutes);
 
 // Global Error Handler (must be strictly after routes)
 app.use(errorHandler);

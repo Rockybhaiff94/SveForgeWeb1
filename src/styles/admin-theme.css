@@ -1,0 +1,63 @@
+:root {
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --bg-dark: #05070a;
+  --bg-card: #0f1117;
+  --text-main: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 80px;
+  --navbar-height: 70px;
+  --transition-speed: 0.3s;
+}
+
+.admin-body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.admin-content h1, .admin-content h2, .admin-content h3, .admin-content h4, .admin-content h5, .admin-content h6 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.admin-content button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.admin-content a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.admin-content ul {
+  list-style: none;
+}
+
+.admin-content ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-content ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-content ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.admin-content ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

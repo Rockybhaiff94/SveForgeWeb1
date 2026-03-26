@@ -1,130 +1,170 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Table, TableHeader, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Power, PowerOff, Trash, Plus, Settings } from 'lucide-react';
-import { ServerModal } from '@/components/admin/ServerModal';
+import React, { useState } from 'react';
+import { 
+  Server, 
+  Search, 
+  Filter, 
+  Plus, 
+  MoreVertical, 
+  RotateCw,
+  Square,
+  ExternalLink
+} from 'lucide-react';
+import GlassCard from '@/components/admin/GlassCard';
+import { motion } from 'framer-motion';
 
-export default function ServersPage() {
-  const [servers, setServers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedServer, setSelectedServer] = useState<any | null>(null);
-
-  const fetchServers = async () => {
-    try {
-      const res = await fetch('/api/servers');
-      const data = await res.json();
-      if(data.servers) setServers(data.servers);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchServers();
-  }, []);
-
-  const handleStatusChange = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'ONLINE' ? 'OFFLINE' : 'ONLINE';
-    if(confirm(`Are you sure you want to ${newStatus === 'ONLINE' ? 'start' : 'stop'} this server?`)) {
-      await fetch('/api/servers', { 
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: newStatus })
-      });
-      fetchServers();
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if(confirm('Are you sure you want to delete this server?')) {
-      await fetch(`/api/servers?id=${id}`, { method: 'DELETE' });
-      fetchServers();
+const ServerStatus = ({ status }: { status: string }) => {
+  const getStatusColor = () => {
+    switch (status) {
+      case 'online': return '#22c55e';
+      case 'offline': return '#ef4444';
+      case 'starting': return '#eab308';
+      case 'maintenance': return '#6366f1';
+      default: return '#94a3b8';
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-100">Server Management</h1>
-          <p className="text-sm text-gray-400 mt-1">Manage game servers, resources, and statuses.</p>
-        </div>
-        <Button className="flex items-center gap-2">
-          <Plus size={18} /> Add Server
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>All Servers</CardHeader>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="p-6 text-center text-gray-400">Loading servers...</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Server Name</TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Resources</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <tbody>
-                {servers.map(server => (
-                  <TableRow key={server._id}>
-                    <TableCell className="font-medium text-gray-200">{server.name}</TableCell>
-                    <TableCell className="text-gray-400">{server.ownerId?.name || 'Unknown'}</TableCell>
-                    <TableCell>
-                      <Badge variant={server.status === 'ONLINE' ? 'success' : 'danger'}>
-                        {server.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-xs text-gray-400">{server.ram}MB RAM</div>
-                      <div className="text-xs text-gray-400">{server.cpu} Cores</div>
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedServer(server)} title="Inspect Server">
-                        <Settings size={16} className="text-blue-400 hover:text-blue-300" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className={server.status === 'ONLINE' ? 'text-yellow-500 hover:text-yellow-400' : 'text-green-500 hover:text-green-400'}
-                        onClick={() => handleStatusChange(server._id, server.status)}
-                        title={server.status === 'ONLINE' ? 'Stop' : 'Start'}
-                      >
-                        {server.status === 'ONLINE' ? <PowerOff size={16} /> : <Power size={16} />}
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(server._id)} className="text-red-400 hover:text-red-300" title="Delete">
-                        <Trash size={16} />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {servers.length === 0 && !loading && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-gray-500 py-8">No servers found.</TableCell>
-                  </TableRow>
-                )}
-              </tbody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-      
-      {selectedServer && (
-        <ServerModal 
-          server={selectedServer}
-          onClose={() => setSelectedServer(null)}
-          onRefresh={fetchServers}
-        />
-      )}
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ 
+        width: '8px', 
+        height: '8px', 
+        borderRadius: '50%', 
+        background: getStatusColor(),
+        boxShadow: `0 0 8px ${getStatusColor()}80` 
+      }} />
+      <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'white', textTransform: 'capitalize' }}>
+        {status}
+      </span>
     </div>
+  );
+};
+
+export default function ServersPage() {
+  const [servers] = useState([
+    { id: 'SF-10293', name: 'US-East-Primary', type: 'Game Server', region: 'New York', status: 'online', cpu: '24%', ram: '8.2GB', ip: '192.168.1.100' },
+    { id: 'SF-10294', name: 'EU-West-Main', type: 'Web Hosting', region: 'London', status: 'starting', cpu: '85%', ram: '12.4GB', ip: '192.168.1.102' },
+    { id: 'SF-10295', name: 'Asia-SE-Node', type: 'Database Node', region: 'Singapore', status: 'online', cpu: '12%', ram: '4.1GB', ip: '192.168.1.105' },
+    { id: 'SF-10296', name: 'BR-South-Backup', type: 'Storage', region: 'Sao Paulo', status: 'maintenance', cpu: '5%', ram: '1.2GB', ip: '192.168.1.108' },
+    { id: 'SF-10297', name: 'AU-East-Game', type: 'Game Server', region: 'Sydney', status: 'offline', cpu: '0%', ram: '0GB', ip: '192.168.1.110' },
+  ]);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+    >
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.875rem', fontWeight: 700, color: 'white' }}>Server Management</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Monitor and control your global server infrastructure.</p>
+        </div>
+        <button className="glass-button" style={{ 
+          padding: '10px 18px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px',
+          background: 'var(--primary)',
+          color: 'white',
+          border: 'none',
+          cursor: 'pointer'
+        }}>
+          <Plus size={18} />
+          <span>Deploy New Server</span>
+        </button>
+      </header>
+
+      <GlassCard>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <div style={{ position: 'relative', width: '300px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+            <input 
+              type="text" 
+              placeholder="Search by name, ID, or IP..."
+              style={{
+                width: '100%',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '10px',
+                padding: '10px 12px 10px 40px',
+                color: 'white',
+                outline: 'none'
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button style={{ padding: '10px 16px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+              <Filter size={18} />
+              <span>Filters</span>
+            </button>
+          </div>
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>SERVER NAME</th>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>STATUS</th>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>CPU/RAM</th>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>IP ADDRESS</th>
+                <th style={{ padding: '16px', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8125rem' }}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {servers.map((server) => (
+                <tr key={server.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }}>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ padding: '8px', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '8px', color: 'var(--primary)' }}>
+                        <Server size={18} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>{server.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{server.id} • {server.type}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px' }}><ServerStatus status={server.status} /></td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.75rem' }}>
+                          <span style={{ color: 'var(--text-secondary)', width: '30px' }}>CPU</span>
+                          <div style={{ flexGrow: 1, height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', width: '60px' }}>
+                            <div style={{ height: '100%', background: 'var(--primary)', width: server.cpu, borderRadius: '2px' }} />
+                          </div>
+                          <span>{server.cpu}</span>
+                       </div>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.75rem' }}>
+                          <span style={{ color: 'var(--text-secondary)', width: '30px' }}>RAM</span>
+                          <div style={{ flexGrow: 1, height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', width: '60px' }}>
+                            <div style={{ height: '100%', background: '#a5b4fc', width: '40%', borderRadius: '2px' }} />
+                          </div>
+                          <span>{server.ram}</span>
+                       </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                      {server.ip}
+                      <ExternalLink size={12} />
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button style={{ padding: '6px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', color: '#22c55e', cursor: 'pointer' }} title="Restart"><RotateCw size={16} /></button>
+                      <button style={{ padding: '6px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', color: '#ef4444', cursor: 'pointer' }} title="Stop"><Square size={16} /></button>
+                      <button style={{ padding: '6px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', color: '#94a3b8', cursor: 'pointer' }} title="More"><MoreVertical size={16} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </GlassCard>
+    </motion.div>
   );
 }
