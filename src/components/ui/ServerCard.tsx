@@ -58,7 +58,7 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
     }
 
     return (
-        <Card className={`flex flex-col h-auto w-full box-border group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative backdrop-blur-xl saturate-150`}>
+        <Card className={`p-0 overflow-hidden flex flex-col h-auto w-full box-border group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative backdrop-blur-xl saturate-150`}>
 
             {/* Top Banner Section (fixed height 140px) */}
             <div className="relative h-[140px] w-full rounded-t-3xl z-10 shrink-0">
