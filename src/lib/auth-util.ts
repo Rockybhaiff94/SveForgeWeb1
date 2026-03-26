@@ -13,10 +13,23 @@ const getBaseUrl = () => {
 };
 const API_BASE_URL = getBaseUrl();
 
+export interface UserSession {
+    id: string;
+    _id: string;
+    username: string;
+    email?: string | null;
+    role: string;
+    avatar?: string | null;
+    discordId?: string | null;
+    provider: 'discord' | 'google' | 'local';
+    createdAt?: Date | string | null;
+    [key: string]: any;
+}
+
 /**
  * Verifies the JWT from the cookies and returns the user object from the backend API.
  */
-export async function getSessionUser() {
+export async function getSessionUser(): Promise<UserSession | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get('sf_token')?.value;
 
@@ -41,8 +54,9 @@ export async function getSessionUser() {
             ...user,
             id: user._id.toString(),
             _id: user._id.toString(),
-            username: user.username || user.name || 'User'
-        };
+            username: user.username || user.name || 'User',
+            provider: user.discordId ? 'discord' : 'local'
+        } as UserSession;
     } catch (error) {
         // If verification fails, try decode as fallback for migration/legacy
         try {
@@ -50,7 +64,12 @@ export async function getSessionUser() {
             if (decoded?.id) {
                 await dbConnect();
                 const user = await User.findById(decoded.id).lean();
-                if (user) return { ...user, id: user._id.toString(), _id: user._id.toString() };
+                if (user) return { 
+                    ...user, 
+                    id: user._id.toString(), 
+                    _id: user._id.toString(),
+                    provider: user.discordId ? 'discord' : 'local'
+                } as UserSession;
             }
         } catch (e) {}
         
