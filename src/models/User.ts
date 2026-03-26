@@ -1,12 +1,16 @@
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  name: { type: String, required: true },
+  email: { type: String, required: false }, // Optional for those without verified discord emails
+  password: { type: String, required: false },
+  name: { type: String, required: false },
+  username: { type: String, required: false },
+  discordId: { type: String, required: false, sparse: true, unique: true },
+  avatar: { type: String, required: false },
+  accessToken: { type: String, required: false },
   role: { 
     type: String, 
-    enum: ['OWNER', 'ADMIN', 'DEV', 'MOD', 'USER'], 
+    enum: ['OWNER', 'ADMIN', 'DEV', 'MOD', 'USER', 'user'], 
     default: 'USER' 
   },
   status: {
