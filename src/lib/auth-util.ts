@@ -5,7 +5,13 @@ import User from '@/models/User';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const API_BASE_URL = process.env.SERVERFORGE_API || 'http://localhost:8080';
+const getBaseUrl = () => {
+    if (process.env.SERVERFORGE_API) return process.env.SERVERFORGE_API;
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}/_/backend`;
+    if (process.env.NEXT_PUBLIC_BASE_URL) return `${process.env.NEXT_PUBLIC_BASE_URL}/_/backend`;
+    return 'http://localhost:8080';
+};
+const API_BASE_URL = getBaseUrl();
 
 /**
  * Verifies the JWT from the cookies and returns the user object from the backend API.
@@ -17,20 +23,37 @@ export async function getSessionUser() {
     if (!token) return null;
 
     try {
-        // Since we are in an enterprise decoupled architecture, 
-        // the frontend should query the backend API for session data.
-        const res = await fetch(`${API_BASE_URL}/auth/me`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            next: { revalidate: 60 } // Cache for 60s
-        });
+        await dbConnect();
+        
+        // Use verify instead of decode for security
+        // Use fallback secret to match jose implementation if env is missing
+        const secret = process.env.JWT_SECRET || 'supersecret_serverforge';
+        
+        const decoded = jwt.verify(token, secret) as any;
+        const id = decoded.id || decoded.userId;
 
-        if (!res.ok) return null;
+        if (!id) return null;
 
-        const data = await res.json();
-        return data.user || null;
+        const user = await User.findById(id).lean();
+        if (!user) return null;
+
+        return {
+            ...user,
+            id: user._id.toString(),
+            _id: user._id.toString(),
+            username: user.username || user.name || 'User'
+        };
     } catch (error) {
+        // If verification fails, try decode as fallback for migration/legacy
+        try {
+            const decoded = jwt.decode(token) as any;
+            if (decoded?.id) {
+                await dbConnect();
+                const user = await User.findById(decoded.id).lean();
+                if (user) return { ...user, id: user._id.toString(), _id: user._id.toString() };
+            }
+        } catch (e) {}
+        
         console.error('getSessionUser Error:', error);
         return null;
     }
