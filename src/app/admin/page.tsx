@@ -240,7 +240,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={data.revenue.planDistribution} innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value">
-                  {data.revenue.planDistribution.map((_, index) => <Cell key={`c-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                  {data.revenue.planDistribution.map((_: any, index: number) => <Cell key={`c-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <Tooltip />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
