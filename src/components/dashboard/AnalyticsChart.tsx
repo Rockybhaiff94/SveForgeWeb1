@@ -4,144 +4,118 @@ import React from "react";
 import { TrendingUp } from "lucide-react";
 
 export function AnalyticsChart() {
-    // Mock data for the smooth line chart
-    const data1 = [20, 45, 30, 60, 40, 75, 55, 90, 70, 110]; // Blue line (Votes)
-    const data2 = [10, 25, 15, 40, 30, 50, 45, 70, 60, 85];  // Orange line (Visitors)
+    // Premium mock data for smooth waves
+    const visitorsData = [35, 65, 45, 85, 60, 95, 75, 120, 90, 115, 105, 130]; 
+    const joinsData = [20, 40, 30, 55, 40, 65, 50, 80, 65, 85, 80, 95];
 
-    const generateSmoothPath = (data: number[]) => {
-        if (data.length === 0) return "";
-        const dx = 100 / (data.length - 1);
-        let path = `M 0,${100 - data[0]} `;
+    // SVG helper to generate smooth cubic bezier curves
+    const getCurvedPath = (data: number[]) => {
+        if (data.length < 2) return "";
+        const width = 1000;
+        const height = 300;
+        const dx = width / (data.length - 1);
+        const maxVal = 140; // Normalize against a max value
+        
+        let d = `M 0,${height - (data[0] / maxVal) * height} `;
+        
         for (let i = 0; i < data.length - 1; i++) {
             const x1 = i * dx;
-            const y1 = 100 - data[i];
+            const y1 = height - (data[i] / maxVal) * height;
             const x2 = (i + 1) * dx;
-            const y2 = 100 - data[i + 1];
-            // Simple cubic bezier control points for a smooth curve
-            const cx1 = x1 + dx / 2;
-            const cy1 = y1;
-            const cx2 = x1 + dx / 2;
-            const cy2 = y2;
-            path += `C ${cx1},${cy1} ${cx2},${cy2} ${x2},${y2} `;
+            const y2 = height - (data[i + 1] / maxVal) * height;
+            
+            // Smooth control points
+            const cp1x = x1 + dx / 2;
+            const cp1y = y1;
+            const cp2x = x1 + dx / 2;
+            const cp2y = y2;
+            
+            d += `C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2} `;
         }
-        return path;
+        return d;
     };
 
-    const path1 = generateSmoothPath(data1);
-    const path2 = generateSmoothPath(data2);
+    const vPath = getCurvedPath(visitorsData);
+    const jPath = getCurvedPath(joinsData);
     
-    // Area paths (close the curve to the bottom)
-    const areaPath1 = `${path1} L 100,100 L 0,100 Z`;
-    const areaPath2 = `${path2} L 100,100 L 0,100 Z`;
+    const vArea = `${vPath} L 1000,300 L 0,300 Z`;
+    const jArea = `${jPath} L 1000,300 L 0,300 Z`;
 
     return (
-        <div className="glass-panel p-8 rounded-3xl border border-white/5 relative overflow-hidden h-[400px] flex flex-col">
-            <div className="flex justify-between items-center mb-8 relative z-10">
+        <div className="glass-panel p-8 rounded-[32px] border border-white/5 relative overflow-hidden h-[450px] flex flex-col bg-white/[0.01]">
+            {/* BACKGROUND GLOW */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
+            
+            <div className="flex justify-between items-start mb-10 relative z-10">
                 <div>
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5 text-blue-500" /> Server Analytics
+                    <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                        Real-time Stats
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">Real-time performance metrics</p>
+                    <h2 className="text-2xl font-black text-white tracking-tight">GROWTH ANALYTICS</h2>
+                    <p className="text-xs text-gray-500 font-bold mt-1">Daily server interactions and visitor conversion</p>
                 </div>
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Votes</span>
+                
+                <div className="flex items-center gap-8 bg-white/5 p-3 rounded-2xl border border-white/5">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)]"></div>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Visitors</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></div>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Visitors</span>
+                    <div className="flex items-center gap-3">
+                        <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(245,158,11,0.8)]"></div>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Joins</span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex-1 relative mt-4">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+            <div className="flex-1 relative mx-[-2rem]">
+                <svg viewBox="0 0 1000 300" preserveAspectRatio="none" className="w-full h-full overflow-visible">
                     <defs>
-                        <linearGradient id="gradient-blue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.4" />
-                            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.0" />
+                        <linearGradient id="g-blue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.15" />
+                            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
                         </linearGradient>
-                        <linearGradient id="gradient-orange" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.4" />
-                            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
+                        <linearGradient id="g-orange" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.15" />
+                            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
                         </linearGradient>
-                        <clipPath id="chart-clip">
-                            <rect x="0" y="0" width="100" height="100" />
-                        </clipPath>
                     </defs>
 
-                    {/* Grid lines */}
-                    {[0, 25, 50, 75, 100].map((val) => (
-                        <line
-                            key={val}
-                            x1="0" y1={val} x2="100" y2={val}
-                            stroke="white" strokeOpacity="0.03" strokeWidth="0.5"
-                            strokeDasharray="2 2"
+                    {/* HORIZONTAL GRID */}
+                    {[0, 75, 150, 225, 300].map((y) => (
+                        <line 
+                            key={y} x1="0" y1={y} x2="1000" y2={y} 
+                            stroke="white" strokeOpacity="0.03" strokeWidth="1" 
                         />
                     ))}
 
-                    <g clipPath="url(#chart-clip)">
-                        {/* Orange Area (Visitors) - Draw First to be in background */}
-                        <path
-                            d={areaPath2}
-                            fill="url(#gradient-orange)"
-                            className="opacity-0 animate-fade-in"
-                            style={{ animation: 'fade-in 1s ease forwards 0.5s' }}
-                        />
-                        {/* Orange Line */}
-                        <path
-                            d={path2}
-                            fill="none"
-                            stroke="#F59E0B"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-draw"
-                            style={{ strokeDasharray: 400, strokeDashoffset: 400, animation: 'draw 2s ease forwards 0.5s' }}
-                        />
+                    {/* AREAS */}
+                    <path d={vArea} fill="url(#g-blue)" className="animate-fade-in opacity-0" style={{ animation: 'fade-in 2s ease forwards' }} />
+                    <path d={jArea} fill="url(#g-orange)" className="animate-fade-in opacity-0" style={{ animation: 'fade-in 2s ease forwards 0.5s' }} />
 
-                        {/* Blue Area (Votes) */}
-                        <path
-                            d={areaPath1}
-                            fill="url(#gradient-blue)"
-                            className="opacity-0 animate-fade-in"
-                            style={{ animation: 'fade-in 1s ease forwards' }}
-                        />
-                        {/* Blue Line */}
-                        <path
-                            d={path1}
-                            fill="none"
-                            stroke="#3B82F6"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="drop-shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-draw"
-                            style={{ strokeDasharray: 400, strokeDashoffset: 400, animation: 'draw 2s ease forwards' }}
-                        />
-                    </g>
+                    {/* LINES */}
+                    <path 
+                        d={vPath} fill="none" stroke="#3B82F6" strokeWidth="4" strokeLinecap="round" 
+                        className="drop-shadow-[0_0_15px_rgba(59,130,246,0.4)] animate-draw"
+                        style={{ strokeDasharray: 2000, strokeDashoffset: 2000, animation: 'draw 3s ease-out forwards' }}
+                    />
+                    <path 
+                        d={jPath} fill="none" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" 
+                        className="drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-draw"
+                        style={{ strokeDasharray: 2000, strokeDashoffset: 2000, animation: 'draw 3s ease-out forwards 0.5s' }}
+                    />
                 </svg>
             </div>
 
-            <div className="flex justify-between mt-6 text-[10px] font-black text-gray-600 uppercase tracking-widest">
-                <span>Mon</span>
-                <span>Tue</span>
-                <span>Wed</span>
-                <span>Thu</span>
-                <span>Fri</span>
-                <span>Sat</span>
-                <span>Sun</span>
+            <div className="flex justify-between mt-8 relative z-10 px-4">
+                {['MAR 20', 'MAR 21', 'MAR 22', 'MAR 23', 'MAR 24', 'MAR 25', 'MAR 26'].map((day) => (
+                    <span key={day} className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{day}</span>
+                ))}
             </div>
 
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500 opacity-5 blur-[100px] -mr-32 -mb-32"></div>
-
             <style jsx>{`
-                @keyframes draw {
-                    to { stroke-dashoffset: 0; }
-                }
-                @keyframes fade-in {
-                    to { opacity: 1; }
-                }
+                @keyframes draw { to { stroke-dashoffset: 0; } }
+                @keyframes fade-in { to { opacity: 1; } }
             `}</style>
         </div>
     );

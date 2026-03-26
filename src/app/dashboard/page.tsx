@@ -80,42 +80,49 @@ export default function DashboardPage() {
     // STEP 4 - Show Dashboard Content if logged in
     return (
         <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-            {/* WELCOME SECTION */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#0B0B0F] to-[#050505] p-8 md:p-12 rounded-[28px] border border-white/5 shadow-2xl">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600 opacity-[0.03] blur-[100px] -mr-48 -mt-48 rounded-full"></div>
-                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-orange-600 opacity-[0.03] blur-[100px] -ml-24 -mb-24 rounded-full"></div>
+            {/* SERVER DASHBOARD HEADER */}
+            <div className="flex flex-col lg:flex-row justify-between items-end gap-6 pb-2 border-b border-white/5">
+                <div className="space-y-1">
+                    <h1 className="text-4xl font-black text-white tracking-tighter italic">SERVER DASHBOARD</h1>
+                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Manage your survival instance</p>
+                </div>
 
-                <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8 text-center lg:text-left">
-                    <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-widest">
-                            <Zap className="w-3 h-3 fill-blue-400" /> User Dashboard
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+                        <button className="px-6 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-all shadow-lg shadow-blue-500/20">Console</button>
+                        <button className="px-6 py-2 text-gray-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-all">Public Listing</button>
+                        <button className="px-6 py-2 text-gray-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-all">Monetization</button>
+                    </div>
+
+                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-[pulse_2s_infinite]"></div>
+                        <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">Online</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* WELCOME SECTION (MINIMIZED) */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#0B0B0F] to-[#050505] p-8 rounded-[28px] border border-white/5 shadow-2xl">
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600 opacity-[0.03] blur-[100px] -mr-48 -mt-48 rounded-full"></div>
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-6">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full"></div>
+                            <img
+                                src={user.avatar || `https://ui-avatars.com/api/?name=${user.username}&background=3B82F6&color=fff&bold=true`}
+                                alt=""
+                                className="w-16 h-16 rounded-2xl border border-white/10 relative z-10 p-1 bg-[#050505]"
+                            />
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
-                            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">{user.username}</span> 👋
-                        </h1>
-                        <p className="text-lg text-gray-400 max-w-xl">
-                            Manage your servers, track performance in real-time, and grow your community with ServerForge.
-                        </p>
-                        <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
-                            <Link href="/add">
-                                <button className="px-8 py-3 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
-                                    <PlusCircle className="w-5 h-5" /> Add New Server
-                                </button>
-                            </Link>
-                            <Link href="/dashboard/servers">
-                                <button className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 flex items-center gap-2 group">
-                                    <List className="w-5 h-5" /> View Listings <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                </button>
-                            </Link>
+                        <div>
+                            <h2 className="text-xl font-black text-white tracking-tight">Welcome back, {user.username}!</h2>
+                            <p className="text-sm text-gray-500">Your server instance is running smoothly on our globally distributed network.</p>
                         </div>
                     </div>
-                    <div className="relative flex-shrink-0">
-                        <div className="absolute inset-0 bg-blue-500 blur-3xl opacity-20 rounded-full"></div>
-                        <img
-                            src={user.avatar || `https://ui-avatars.com/api/?name=${user.username}&background=3B82F6&color=fff&bold=true&size=200`}
-                            alt={user.username}
-                            className="w-48 h-48 md:w-56 md:h-56 rounded-[40px] border-4 border-[#3B82F6]/30 object-cover shadow-2xl relative z-10 p-2 bg-[#050505]"
-                        />
+                    <div className="flex gap-3">
+                        <Link href="/add">
+                            <button className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-white/10">Add Server</button>
+                        </Link>
                     </div>
                 </div>
             </div>
