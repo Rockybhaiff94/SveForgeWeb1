@@ -58,17 +58,17 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
     }
 
     return (
-        <Card className={`flex flex-col h-full group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative backdrop-blur-xl saturate-150`}>
+        <Card className={`flex flex-col h-auto w-full box-border group bg-[#121212] rounded-3xl ${borderClass} ${glowClass} transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-2 relative backdrop-blur-xl saturate-150`}>
 
-            {/* Top Banner Section (16:9) */}
-            <div className="relative aspect-video w-full rounded-t-3xl z-10 shrink-0">
+            {/* Top Banner Section (fixed height 140px) */}
+            <div className="relative h-[140px] w-full rounded-t-3xl z-10 shrink-0">
                 <div className="absolute inset-0 overflow-hidden rounded-t-3xl bg-[#050505]">
                     {server.bannerImage ? (
                         <Image
                             src={server.bannerImage}
                             alt={`${server.serverName || server.name} banner`}
                             fill
-                            className="object-cover transition-transform duration-200 group-hover:scale-[1.03] opacity-90"
+                            className="object-cover transition-transform duration-200 group-hover:scale-[1.03] opacity-90 block w-full h-[140px]"
                         />
                     ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-[#1E3A8A] to-[#1E40AF] transition-transform duration-200 group-hover:scale-[1.03]" />
@@ -114,9 +114,9 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
             </div>
 
             {/* Content Section */}
-            <CardContent className="flex flex-col flex-grow pt-10 pb-5 px-5 z-10">
+            <CardContent className="flex flex-col w-full box-border gap-[10px] p-[14px] pt-10 z-10">
                 {/* Header Content */}
-                <div className="flex justify-between items-start mb-2 gap-3">
+                <div className="flex justify-between items-start gap-3 w-full">
                     <Link href={`/server/${server.slug || server._id}`} className="hover:text-[#3B82F6] transition-colors flex-1 min-w-0">
                         <h2 className="text-[18px] font-bold truncate text-white tracking-tight leading-tight">{server.serverName || server.name}</h2>
                     </Link>
@@ -125,12 +125,12 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                     </div>
                 </div>
 
-                <p className="text-[13px] text-gray-400 line-clamp-2 mb-3 leading-relaxed min-h-[38px]">
+                <p className="text-[13px] text-gray-400 line-clamp-2 leading-relaxed w-full">
                     {server.description}
                 </p>
 
                 {/* Tags Section */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
+                <div className="flex flex-wrap gap-1.5 w-full">
                     {server.tags?.slice(0, 3).map((tag) => (
                         <div key={tag} className="px-2 py-0.5 rounded text-[11px] font-medium text-gray-300 bg-white/5 border border-white/5 tracking-wide">
                             {tag}
@@ -143,10 +143,8 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                     )}
                 </div>
 
-                <div className="flex-grow" />
-
                 {/* Single Horizontal Stats Row */}
-                <div className="flex items-center justify-between text-[11px] font-medium text-gray-300 mb-5 pb-1">
+                <div className="flex flex-row flex-wrap items-center justify-between text-[11px] font-medium text-gray-300 w-full bg-black/20 p-2 rounded-lg border border-white/5">
                     <div className="flex items-center gap-1" title="Online Players">
                         <Users className="w-4 h-4 text-[#3B82F6]" />
                         <span>{server.players ?? 0}</span>
@@ -169,15 +167,15 @@ export function ServerCard({ server, rank, isTrending, isTopRated }: ServerCardP
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-row gap-3">
-                    <Link href={`/server/${server.slug || server._id}`} className="flex-1">
+                <div className="flex flex-row gap-[10px] w-full mt-[8px]">
+                    <Link href={`/server/${server.slug || server._id}`} className="flex-1 w-full">
                         <Button
                             className="w-full h-10 rounded-md bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold text-[13px] tracking-wide transition-all border-none shadow-none hover:shadow-[0_4px_14px_rgba(34,197,94,0.39)] uppercase"
                         >
                             JOIN
                         </Button>
                     </Link>
-                    <Link href={`/vote/${server.slug || server._id}`} className="flex-1">
+                    <Link href={`/vote/${server.slug || server._id}`} className="flex-1 w-full">
                         <Button
                             className="w-full h-10 rounded-md bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-[13px] tracking-wide transition-all border-none shadow-none hover:shadow-[0_4px_14px_rgba(88,101,242,0.39)] uppercase"
                         >
