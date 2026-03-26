@@ -48,6 +48,7 @@ function LoginMessage({ error, details }: { error: string | null, details: strin
 export default function LoginPage() {
     const searchParams = useSearchParams();
     const error = searchParams.get("error");
+    const details = searchParams.get("details");
 
     return (
         <div className="flex min-h-[80vh] items-center justify-center p-4">
@@ -72,7 +73,7 @@ export default function LoginPage() {
                     <div className="h-px bg-white/10 flex-1"></div>
                 </div>
 
-                <LoginMessage error={error} />
+                <LoginMessage error={error} details={details} />
 
                 <div className="mt-8 pt-6 border-t border-white/5 text-center">
                     <p className="text-xs text-gray-500">
