@@ -29,4 +29,10 @@ const UserSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.models.User || mongoose.model('User', UserSchema);
+// Force refresh model if it exists to ensure new schema is picked up
+if (mongoose.models && mongoose.models.User) {
+  delete mongoose.models.User;
+}
+
+const User = mongoose.model('User', UserSchema);
+export default User;

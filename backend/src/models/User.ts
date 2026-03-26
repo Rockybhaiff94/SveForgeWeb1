@@ -21,9 +21,9 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true, index: true },
-  passwordHash: { type: String, required: true },
-  username: { type: String, required: true },
-  role: { type: String, enum: ['OWNER', 'ADMIN', 'DEV', 'MOD', 'USER'], default: 'USER' },
+  passwordHash: { type: String, required: false }, // Optional for OAuth users
+  username: { type: String, required: false }, // Optional
+  role: { type: String, enum: ['OWNER', 'ADMIN', 'DEV', 'MOD', 'USER', 'user'], default: 'USER' },
   status: { type: String, enum: ['ACTIVE', 'SUSPENDED', 'BANNED', 'SHADOW_BANNED'], default: 'ACTIVE' },
   tokenVersion: { type: Number, default: 0 },
   permissions: {

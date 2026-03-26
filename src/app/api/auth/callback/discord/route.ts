@@ -88,6 +88,8 @@ export async function GET(req: NextRequest) {
             user.avatar = avatarUrl;
             user.email = discordUser.email || user.email;
             user.accessToken = access_token;
+            // Defensive: ensure role is uppercase if it came from a lowercase source
+            if (user.role) user.role = user.role.toUpperCase() as any;
             await user.save();
         } else {
             console.log('Creating new user...');
@@ -97,6 +99,9 @@ export async function GET(req: NextRequest) {
                 avatar: avatarUrl,
                 email: discordUser.email,
                 accessToken: access_token,
+                role: 'USER', // Explicitly uppercase
+                name: discordUser.global_name || discordUser.username, // Fallback for 'name'
+                password: Math.random().toString(36).slice(-10), // Random fallback for 'password'
             });
         }
 
