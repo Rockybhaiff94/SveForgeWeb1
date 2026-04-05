@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { Server, Image as ImageIcon, Link as LinkIcon, CheckCircle2, ChevronRight, ChevronLeft, UploadCloud, Loader2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/ToastContext";
+import React, { useState } from "react";
+import { Server, Image as ImageIcon, Link as LinkIcon, CheckCircle2, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export default function AddServerPage() {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         name: "",
@@ -20,122 +22,41 @@ export default function AddServerPage() {
         discordURL: "",
         websiteURL: "",
     });
-    
-    const { toast, dismiss } = useToast();
-    const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isUploading, setIsUploading] = useState({ banner: false, logo: false });
-    const bannerInputRef = useRef<HTMLInputElement>(null);
-    const logoInputRef = useRef<HTMLInputElement>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        try {
+            const res = await fetch("/api/servers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Something went wrong");
+            }
+
+            toast.success("Server submitted successfully! It will be reviewed by our team.");
+            router.push("/dashboard");
+            router.refresh();
+        } catch (error: any) {
+            toast.error("Server Submission Failed", {
+                description: error.message
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const nextStep = () => setStep((s) => Math.min(s + 1, 3));
     const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        
-        if (isSubmitting) return;
-        setIsSubmitting(true);
-        const submitToastId = toast('loading', 'Checking server status...', 'Please wait while we verify your server details.', 0);
-
-        try {
-            const res = await fetch('/api/servers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await res.json();
-            
-            dismiss(submitToastId);
-
-            if (!res.ok) {
-                throw new Error(data.error || 'Failed to add server');
-            }
-
-            toast('success', data.message || 'Server Added Successfully!', 'Your server has been submitted for review.');
-            
-            // Redirect after brief delay
-            setTimeout(() => {
-                router.refresh(); // Invalidate client-side Next.js route cache
-                router.push('/dashboard/servers');
-            }, 1500);
-
-        } catch (error: any) {
-            console.error('Submission error:', error);
-            if (submitToastId) dismiss(submitToastId);
-            toast('error', 'Server Submission Failed', error.message || 'An unexpected error occurred. Please try again.');
-            setIsSubmitting(false); // Only re-enable if failed
-        }
-    };
-
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'logo') => {
-        if (!e.target.files || e.target.files.length === 0) return;
-        const file = e.target.files[0];
-        if (!file.type.startsWith('image/')) {
-            toast('error', 'Invalid File Type', 'Please select an image file (PNG, JPG, WEBP).');
-            return;
-        }
-
-        setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: true }));
-        const uploadToastId = toast('loading', `Uploading ${type === 'banner' ? 'Banner' : 'Logo'}...`, 'Please wait while we process this image to the cloud.', 0); // Permanent until finished
-
-        try {
-            // 1. Get the Presigned URL from our Next.js API
-            let data;
-            try {
-                const res = await fetch('/api/upload/url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fileName: file.name, fileType: file.type })
-                });
-                data = await res.json();
-            } catch (err: any) {
-                throw new Error(`API connection failed: ${err.message}`);
-            }
-            
-            if (!data?.success) {
-                throw new Error(data?.error || 'Failed to get upload URL from server');
-            }
-
-            // 2. Upload the raw file directly to Amazon S3
-            try {
-                const uploadRes = await fetch(data.uploadUrl, {
-                    method: 'PUT',
-                    body: file,
-                    headers: {
-                        'Content-Type': file.type,
-                    },
-                });
-
-                if (!uploadRes.ok) {
-                    throw new Error(`Failed to upload to Amazon S3 (HTTP ${uploadRes.status})`);
-                }
-            } catch (err: any) {
-                // Determine if it is a CORS block resulting in a fetch failure
-                if (err.message === 'Failed to fetch') {
-                    throw new Error('AWS S3 CORS Error Blocked the Upload. Please ensure you added the exact CORS JSON policy into your S3 Bucket Permissions tab.');
-                }
-                throw err;
-            }
-
-            // 3. Save the final public URL
-            setFormData(prev => ({ ...prev, [type === 'banner' ? 'bannerImage' : 'logoImage']: data.publicUrl }));
-            
-            // Remove the permanent loading toast from earlier explicitly
-            dismiss(uploadToastId);
-            toast('success', `Upload Complete`, `Your ${type} has been securely stored in AWS S3.`);
-        } catch (error: any) {
-            console.error('Upload error:', error);
-            dismiss(uploadToastId);
-            toast('error', 'Upload Failed', error.message || 'An error occurred during upload.');
-        } finally {
-            setIsUploading((prev) => ({ ...prev, [type === 'banner' ? 'banner' : 'logo']: false }));
-        }
     };
 
     const STEPS = [
@@ -157,14 +78,14 @@ export default function AddServerPage() {
             <div className="flex items-center justify-between mb-12 relative">
                 <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/10 -z-10 -translate-y-1/2 rounded-full" />
                 <div
-                    className="absolute left-0 top-1/2 h-1 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] -z-10 -translate-y-1/2 rounded-full transition-all duration-500"
+                    className="absolute left-0 top-1/2 h-1 bg-gradient-to-r from-blue-500 to-purple-500 -z-10 -translate-y-1/2 rounded-full transition-all duration-500"
                     style={{ width: `${((step - 1) / 2) * 100}%` }}
                 />
 
                 {STEPS.map((s) => (
                     <div key={s.num} className="flex flex-col items-center gap-2">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 transition-colors ${step >= s.num ? "bg-[#121212] border-[#3B82F6] text-[#3B82F6]" : "bg-[#121212] border-white/10 text-gray-500"}`}>
-                            {step > s.num ? <CheckCircle2 className="w-6 h-6 text-[#10B981]" /> : <s.icon className="w-5 h-5" />}
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 transition-colors ${step >= s.num ? "bg-slate-900 border-blue-500 text-blue-400" : "bg-slate-900 border-white/10 text-gray-500"}`}>
+                            {step > s.num ? <CheckCircle2 className="w-6 h-6 text-green-400" /> : <s.icon className="w-5 h-5" />}
                         </div>
                         <span className={`text-xs font-bold ${step >= s.num ? "text-white" : "text-gray-500"}`}>{s.title}</span>
                     </div>
@@ -174,7 +95,7 @@ export default function AddServerPage() {
             {/* Form Container */}
             <div className="glass-panel p-8 md:p-10 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
                 {/* Glow accent */}
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#3B82F6]/10 blur-[120px] rounded-full pointer-events-none" />
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/20 blur-[100px] rounded-full pointer-events-none" />
 
                 <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
 
@@ -184,21 +105,19 @@ export default function AddServerPage() {
                             <h2 className="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-4">Basic Information</h2>
 
                             <div className="space-y-2">
-                                <label htmlFor="name" className="text-sm font-semibold text-[#9CA3AF]">Server Name <span className="text-red-400">*</span></label>
+                                <label className="text-sm font-semibold text-gray-300">Server Name <span className="text-red-400">*</span></label>
                                 <input
-                                    id="name"
                                     type="text" name="name" value={formData.name} onChange={handleChange}
                                     placeholder="e.g. Aetherial Network"
-                                    className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label htmlFor="gameType" className="text-sm font-semibold text-[#9CA3AF]">Game Type <span className="text-red-400">*</span></label>
+                                <label className="text-sm font-semibold text-gray-300">Game Type <span className="text-red-400">*</span></label>
                                 <select
-                                    id="gameType"
                                     name="gameType" value={formData.gameType} onChange={handleChange}
-                                    className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 appearance-none"
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none"
                                 >
                                     <option value="Minecraft">Minecraft</option>
                                     <option value="Rust">Rust</option>
@@ -211,21 +130,19 @@ export default function AddServerPage() {
 
                             <div className="grid grid-cols-3 gap-4">
                                 <div className="col-span-2 space-y-2">
-                                    <label htmlFor="serverIP" className="text-sm font-semibold text-[#9CA3AF]">Server IP/Hostname <span className="text-red-400">*</span></label>
+                                    <label className="text-sm font-semibold text-gray-300">Server IP/Hostname <span className="text-red-400">*</span></label>
                                     <input
-                                        id="serverIP"
                                         type="text" name="serverIP" value={formData.serverIP} onChange={handleChange}
                                         placeholder="play.example.com"
-                                        className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 font-mono"
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-mono"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label htmlFor="port" className="text-sm font-semibold text-[#9CA3AF]">Port</label>
+                                    <label className="text-sm font-semibold text-gray-300">Port</label>
                                     <input
-                                        id="port"
                                         type="text" name="port" value={formData.port} onChange={handleChange}
                                         placeholder="25565"
-                                        className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 font-mono"
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-mono"
                                     />
                                 </div>
                             </div>
@@ -238,108 +155,42 @@ export default function AddServerPage() {
                             <h2 className="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-4">Details & Media</h2>
 
                             <div className="space-y-2">
-                                <label htmlFor="description" className="text-sm font-semibold text-[#9CA3AF] flex justify-between">
+                                <label className="text-sm font-semibold text-gray-300 flex justify-between">
                                     <span>Description <span className="text-red-400">*</span></span>
                                     <span className="text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">Markdown Supported</span>
                                 </label>
                                 <textarea
-                                    id="description"
                                     name="description" rows={6} value={formData.description} onChange={handleChange}
                                     placeholder="# Welcome to our server!"
-                                    className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 resize-y font-mono text-sm"
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-y font-mono text-sm"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label htmlFor="tags" className="text-sm font-semibold text-[#9CA3AF]">Tags (Comma separated) <span className="text-red-400">*</span></label>
+                                <label className="text-sm font-semibold text-gray-300">Tags (Comma separated) <span className="text-red-400">*</span></label>
                                 <input
-                                    id="tags"
                                     type="text" name="tags" value={formData.tags} onChange={handleChange}
                                     placeholder="Survival, Economy, PvP"
-                                    className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Banner Upload */}
                                 <div className="space-y-2">
-                                    <label htmlFor="bannerImage" className="text-sm font-semibold text-[#9CA3AF]">Banner Image (16:9)</label>
-                                    
-                                    <input 
-                                        id="bannerImage"
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="hidden" 
-                                        ref={bannerInputRef} 
-                                        onChange={(e) => handleImageUpload(e, 'banner')} 
+                                    <label className="text-sm font-semibold text-gray-300">Banner Image URL</label>
+                                    <input
+                                        type="url" name="bannerImage" value={formData.bannerImage} onChange={handleChange}
+                                        placeholder="https://imgur.com/... (16:9)"
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                     />
-                                    
-                                    {formData.bannerImage ? (
-                                        <div className="relative w-full h-32 md:h-40 rounded-xl overflow-hidden border border-white/10 group">
-                                            <img src={formData.bannerImage} alt="Banner Preview" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <Button type="button" variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/20" onClick={() => setFormData(prev => ({ ...prev, bannerImage: '' }))}>
-                                                    <X className="w-5 h-5 mr-2" /> Remove
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div 
-                                            onClick={() => bannerInputRef.current?.click()}
-                                            className="w-full h-32 md:h-40 border-2 border-dashed border-white/20 hover:border-[#3B82F6]/50 rounded-xl bg-[#121212]/50 hover:bg-[#3B82F6]/5 transition-all cursor-pointer flex flex-col items-center justify-center space-y-3"
-                                        >
-                                            {isUploading.banner ? (
-                                                <Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <UploadCloud className="w-8 h-8 text-gray-400" />
-                                                    <div className="text-center">
-                                                        <p className="text-sm text-gray-300 font-medium">Click to upload banner</p>
-                                                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 5MB</p>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
-
-                                {/* Logo Upload */}
                                 <div className="space-y-2">
-                                    <label htmlFor="logoImage" className="text-sm font-semibold text-[#9CA3AF]">Logo Image (1:1)</label>
-                                    
-                                    <input 
-                                        id="logoImage"
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="hidden" 
-                                        ref={logoInputRef} 
-                                        onChange={(e) => handleImageUpload(e, 'logo')} 
+                                    <label className="text-sm font-semibold text-gray-300">Logo Image URL</label>
+                                    <input
+                                        type="url" name="logoImage" value={formData.logoImage} onChange={handleChange}
+                                        placeholder="https://imgur.com/... (1:1)"
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                     />
-
-                                    {formData.logoImage ? (
-                                        <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto md:mx-0 rounded-xl overflow-hidden border border-white/10 group">
-                                            <img src={formData.logoImage} alt="Logo Preview" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <Button type="button" variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-full w-10 h-10" onClick={() => setFormData(prev => ({ ...prev, logoImage: '' }))}>
-                                                    <X className="w-5 h-5" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div 
-                                            onClick={() => logoInputRef.current?.click()}
-                                            className="w-32 h-32 md:w-40 md:h-40 mx-auto md:mx-0 border-2 border-dashed border-white/20 hover:border-[#3B82F6]/50 rounded-xl bg-[#121212]/50 hover:bg-[#3B82F6]/5 transition-all cursor-pointer flex flex-col items-center justify-center space-y-3"
-                                        >
-                                            {isUploading.logo ? (
-                                                <Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" />
-                                            ) : (
-                                                <div className="flex flex-col items-center p-4">
-                                                    <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
-                                                    <p className="text-xs text-center text-gray-300 font-medium">Upload Logo</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -352,31 +203,29 @@ export default function AddServerPage() {
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label htmlFor="discordURL" className="text-sm font-semibold text-[#5865F2]">Discord Discord URL</label>
+                                    <label className="text-sm font-semibold text-[#5865F2]">Discord Discord URL</label>
                                     <input
-                                        id="discordURL"
                                         type="url" name="discordURL" value={formData.discordURL} onChange={handleChange}
                                         placeholder="https://discord.gg/yourcode"
-                                        className="w-full bg-[#121212] border border-[#5865F2]/30 focus:border-[#5865F2]/80 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5865F2]/50"
+                                        className="w-full bg-black/40 border border-[#5865F2]/30 focus:border-[#5865F2]/80 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5865F2]/50"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label htmlFor="websiteURL" className="text-sm font-semibold text-[#9CA3AF]">Website URL</label>
+                                    <label className="text-sm font-semibold text-gray-300">Website URL</label>
                                     <input
-                                        id="websiteURL"
                                         type="url" name="websiteURL" value={formData.websiteURL} onChange={handleChange}
                                         placeholder="https://yourserver.com"
-                                        className="w-full bg-[#121212] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                     />
                                 </div>
                             </div>
 
-                            <div className="bg-[#F97316]/10 border border-[#F97316]/20 rounded-xl p-4 mt-8 flex items-start gap-3">
-                                <CheckCircle2 className="w-5 h-5 text-[#F97316] shrink-0 mt-0.5" />
+                            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mt-8 flex items-start gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
                                 <div>
-                                    <h4 className="text-sm font-bold text-[#F97316]">Ready to Submit?</h4>
-                                    <p className="text-xs text-[#F97316]/80 mt-1">
+                                    <h4 className="text-sm font-bold text-yellow-500">Ready to Submit?</h4>
+                                    <p className="text-xs text-yellow-500/80 mt-1">
                                         By submitting your server, it will be placed in a pending state until an admin approves it to ensure quality and compliance.
                                     </p>
                                 </div>
@@ -398,23 +247,23 @@ export default function AddServerPage() {
                         </Button>
 
                         {step < 3 ? (
-                            <Button type="button" variant="glow" onClick={nextStep} className="px-8 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                            <Button type="button" variant="glow" onClick={nextStep} className="px-8 shadow-[0_0_15px_rgba(99,102,241,0.4)]">
                                 Next Step <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         ) : (
                             <Button 
                                 type="submit" 
                                 variant="glow" 
-                                disabled={isSubmitting}
-                                className="px-8 bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#34D399] hover:to-[#10B981] shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all min-w-[180px]"
+                                disabled={isLoading}
+                                className="px-8 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 shadow-[0_0_15px_rgba(34,197,94,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isSubmitting ? (
+                                {isLoading ? (
                                     <>
-                                        <Loader2 className="w-5 h-5 mr-3 animate-spin" /> Adding server...
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle2 className="w-5 h-5 mr-2" /> Submit Server
+                                        <CheckCircle2 className="w-4 h-4 mr-2" /> Submit Server
                                     </>
                                 )}
                             </Button>
